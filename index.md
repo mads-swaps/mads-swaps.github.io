@@ -1,17 +1,15 @@
 August 24, 2021
 
 <dl>
-<dt>Project Team</dt>
-<dd>Nicholas Miller* (nmill@umich.edu)</dd>
-<dd>Sophie Deng* (sophdeng@umich.edu)</dd>
-<dd>Tim Chen* (ttcchen@umich.edu)</dd>
-<dt>Github Repository</dt>
+<dt>Authors</dt>
+<dd>Nicholas Miller (nmill@umich.edu)</dd>
+<dd>Sophie Deng (sophdeng@umich.edu)</dd>
+<dd>Tim Chen (ttcchen@umich.edu)</dd>
+<dt>Source Code</dt>
 <dd><a href='https://github.com/mads-swaps/swap-for-profit'>https://github.com/mads-swaps/swap-for-profit</a></dd>
-<dt>This Paper</dt>
+<dt>Link to this post</dt>
 <dd><a href='https://mads-swaps.github.io/'>https://mads-swaps.github.io/</a></dd>
 </dl>
-
-\* equal contribution
 
 # Background
 
