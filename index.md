@@ -40,7 +40,7 @@ In traditional forex trading, stop and limit orders are methods to protect an in
 
 In the example below, a buy opportunity is identified at the close of the 4:00am candlestick at a price of `0.060497` Bitcoin (`BTC`) per 1.0 Etherum (`ETH`).  Buying ETH at this price, a target and stop loss is calculated with a `1.0% : 0.5%` ratio, thus `0.061102` for a target and `0.060195` for a stop loss.  The price reaches the target price eight candlesticks later or 2 hours later at 6:00am, thus securing `1.0%` profit (assuming no fees).
 
-![images/target_profits.png](images/target_profits.png){: .align-center}
+![images/target_profits.png](images/target_profits.png){: .align-center !important}
 <center><b>Figure X</b> - Example <code>ETH</code> buy opportunity.</center>
 
 ### Identifying Buying Opportunities
