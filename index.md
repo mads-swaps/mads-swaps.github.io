@@ -1,9 +1,3 @@
-<style>
-  .img-container {
-    text-align: center;
-  }
-</style>
-
 August 24, 2021
 
 <dl>
