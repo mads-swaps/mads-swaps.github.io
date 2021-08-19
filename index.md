@@ -1,3 +1,9 @@
+<style>
+  .img-container {
+    text-align: center;
+  }
+</style>
+
 August 24, 2021
 
 <dl>
@@ -13,18 +19,18 @@ August 24, 2021
 
 # Background
 
-This post will introduce data scientists who are interested in cryptocurrency exchange models that can be used to predict buy and sell opportunities based on several strategies with indepth descriptions and access to code that is being used to simulate a variety of models with varying performance.
+This post will introduce data scientists who are interested in cryptocurrency exchange models that can be used to predict buy and sell opportunities based on several strategies with in depth descriptions and access to code that is being used to simulate a variety of models with varying performance.
 
 ## What is Forex
 
-Forex is short for foreign currency exchange and is the trading of currencies with the goal making profits by timing the buy and sell of specific currency paris while using candlestick charts. Strategies for trading are created by looking for patterns that can be used to predict future currency exchange price flucations.  
+Forex is short for foreign currency exchange and is the trading of currencies with the goal making profits by timing the buy and sell of specific currency pairs while using candlestick charts. Strategies for trading are created by looking for patterns that can be used to predict future currency exchange price fluctuations.  
 
 ## Candlestick Charts
 
-A candlestick chart is the standard plot used in visualizing trading activity where a candle is represented by a box plot that visualizes 4 prices within a given period: the high, low, open and close price.  The box, or body of the candle, is colored based on if the open price is greater than the close and differently if vice versa.  In the below chart, a white candlestick means the close price is higher than the open price meaning the price is going up.  The lines coming out of the candlestick body are called "shadows" or "wicks" and represent the price spread for the given period by extending out to the high and low price.  An individual candlestick can represnt a period as short as a second to days or weeks or more.  The chart below is a 15 minute candlestick chart so each candlestick represents a 15 minute period.
+A candlestick chart is the standard plot used in visualizing trading activity where a candle is represented by a box plot that visualizes 4 prices within a given period: the high, low, open and close price.  The box, or body of the candle, is colored based on if the open price is greater than the close and differently if vice versa.  In the below chart, a white candlestick means the close price is higher than the open price meaning the price is going up.  The lines coming out of the candlestick body are called "shadows" or "wicks" and represent the price spread for the given period by extending out to the high and low price.  An individual candlestick can represent a period as short as a second to days or weeks or more.  The chart below is a 15 minute candlestick chart so each candlestick represents a 15 minute period.
 
 ![images/15min_candle.png](images/15min_candle.png)
-<center><b>Figure X</b> - Here is an example 15-minute candlestick chart for the Ethereum/Bitcoin cryptocurrency exchange rate.<br>This visualization was rendered using the Python library <a href='https://github.com/matplotlib/mplfinance'><code>mplfinance</code></a>.</center>`
+<center><b>Figure X</b> - Here is an example 15-minute candlestick chart for the Ethereum/Bitcoin cryptocurrency exchange rate.<br>This visualization was rendered using the Python library <a href='https://github.com/matplotlib/mplfinance'><code>mplfinance</code></a>.</center>
 
 # Data Acquisition
 
@@ -32,9 +38,11 @@ A candlestick chart is the standard plot used in visualizing trading activity wh
 
 # Strategies
 
+# Strategies
+
 ## Target and Stop Loss
 
-In traditional forex trading, stop and limit orders are methods to protect an investor that can be used to buy and sell currencies when a price reaches a certain level.  Using this, a preditive model can focus only on buy opportunities and then rely on a simple strategy to determine when to sell. A sell strategy defines two sell prices for a given buy opportunity.  The first sell price is called the **target**, which is the high price that results in a profit and the next is the **stop loss**, which is the low resulting in a loss. When a buy opportunity is identified, and the a target and stop loss is calculated, the purchase can be made and the sell will be automatic either by the exchange or by another system that monitors the market price.
+In traditional forex trading, stop and limit orders are methods to protect an investor that can be used to buy and sell currencies when a price reaches a certain level.  Using this, a predictive model can focus only on buy opportunities and then rely on a simple strategy to determine when to sell. A sell strategy defines two sell prices for a given buy opportunity.  The first sell price is called the **target**, which is the high price that results in a profit and the next is the **stop loss**, which is the low resulting in a loss. When a buy opportunity is identified, and a target and stop loss is calculated, the purchase can be made and the sell will be automatic either by the exchange or by another system that monitors the market price.
 
 In the example below, a buy opportunity is identified at the close of the 4:00am candlestick at a price of `0.060497` Bitcoin (`BTC`) per 1.0 Etherum (`ETH`).  Buying ETH at this price, a target and stop loss is calculated with a `1.0% : 0.5%` ratio, thus `0.061102` for a target and `0.060195` for a stop loss.  The price reaches the target price eight candlesticks later or 2 hours later at 6:00am, thus securing `1.0%` profit (assuming no fees).
 
@@ -45,24 +53,24 @@ In the example below, a buy opportunity is identified at the close of the 4:00am
 
 Using a target and stop loss approach simplifies the model to a binary classification problem but a new problem is created, there is no labeled data to train on.  The goal here is to create a label for each record.  A record being the data for one candlestick.  This includes the low, high, open and close prices as well as some additional features such as volume and number of trades.  Using the close price for each record, a target and stop loss price is calculated using the same threshold ratio that will be used on the deployed model.  Using the example above, a ratio of `1.0% : 0.5%` returns a target price `1.0%` higher than the close price and a stop loss of `0.5%` below the close price.  The next step is to peek into the future and see what happens first. Does the price reach the target price first or the stop loss?  If it reaches the target, the record's label will be a `1` meaning "buy".  Another consideration is how far in the future it should look.  This is called the "window".  Typically, 15 candles in the future is used.  If the price reaches stop loss first or if price hovers between the target and stop loss within the window, the record will be a `0` meaning "not buy".
 
-A common question is why not make the stop loss as small as possible?  Setting the stop loss too small can result in being "wicked out" of a trade.  Looking at figure above, if the stoploss is made too small, the wick of the next candle after the buy could poke through resulting in the stop loss being breached before the target price, thus resulting in a "not buy".  Therefore, setting a higher stop loss gives some buffer for the price to flucate before a gain is achieved while minimizing losses.
+A common question is why not make the stop loss as small as possible?  Setting the stop loss too small can result in being "wicked out" of a trade.  Looking at figure above, if the stoploss is made too small, the wick of the next candle after the buy could poke through resulting in the stop loss being breached before the target price, thus resulting in a "not buy".  Therefore, setting a higher stop loss gives some buffer for the price to fluctuate before a gain is achieved while minimizing losses.
 
-For the remainder of the target stop loss strategy discussion, the strategy will focus on `BTC` buy opportunities with the starting coin being `ETH`.  In other words, `ETH` will be used to buy `BTC` and will be sold back to `ETH` when the price reaches a target or stop loss price.  This can cause a bit of confusion because the price is the number of BTC within 1 ETH which means, a profit is made when the price actually drops thus the target will be lower than stop loss (opposite the figure above).  It is for this reason the `reverse` flag is set to `True` (seen below).
+For the remainder of the target stop loss strategy discussion, the strategy will focus on `BTC` buy opportunities with the starting coin being `ETH`.  In other words, `ETH` will be used to buy `BTC` and will be sold back to `ETH` when the price reaches a target or stop loss price.  This can cause a bit of confusion because the price is the number of BTC within 1 ETH which means, a profit is made when the price actually drops thus the target will be lower than stop loss (opposite the figure above).  It is for this reason the `reverse` flag is set to `True` (see below).
 
 ### Determining Ideal Ratios
 
-In the example above, a `1.0% : 0.5%` ratio is used but is this a good ratio to use?  Setting a ratio of `10% : 5%` might be too high because it would be unlikely to gain `10%` resulting in a very sparsely labeled dataset.  Likewise, using a ratio of `0.1% : 0.005%` could be too low, especially when considering transaction fees (to be dicussed later).  It's also worth mentioning that using a percentage might result in inconsistencies since some currency pairs are more volatile than others and volatility for a given pair can change over time.  For this reason, forex traders sometimes use a ratio of the ATR.  For example, using an ATR `2:1` ratio is a good place to start.
+In the example above, a `1.0% : 0.5%` ratio is used but is this a good ratio to use?  Setting a ratio of `10% : 5%` might be too high because it would be unlikely to gain `10%` resulting in a very sparsely labeled dataset.  Likewise, using a ratio of `0.1% : 0.005%` could be too low, especially when considering transaction fees (to be discussed later).  It's also worth mentioning that using a percentage might result in inconsistencies since some currency pairs are more volatile than others and volatility for a given pair can change over time.  For this reason, forex traders sometimes use a ratio of the ATR.  For example, using an ATR `2:1` ratio is a good place to start.
 
-Models generally perform better on balanced data so getting half of the labels to be `1` is ideal.  But achieving this with a ratio that is consistent and profitable may not be practical.  To find a good ratio, different multiples are generated and the percent of `1`'s is plotted.  On the below ATR ratio figure, the multiple of `2x` means the numerator is `2` times the denominator, where the denominator is the `x-axis` value.  Therefore, when `x-axis = 3` the ratio is `6:3`.  When the multiple is `4x` and `x-axis = 2`, the ratio is `8:2`, etc.  For the percentage ratio, `x-axis` represents the numerator and the denominator is then the numerator divided by the legend's label.  For example, when `x-axis = 0.01` for the `/2` line, the ratio is `1.0% : 0.5%`.
+Models generally perform better on balanced data so getting half of the labels to be `1` is ideal.  But achieving this with a ratio that is consistent and profitable may not be practical.  To find a good ratio, different multiples are generated and the percent of `1`'s is plotted.  On the below ATR ratio figure, the multiple of `2x` means the numerator is `2` times the denominator, where the denominator is the `x-axis` value.  Therefore, when `x-axis = 3` the ratio is `6:3`.  When the multiple is `4x` and `x-axis = 2`, the ratio is `8:2`, etc.  For the percentage ratio, `x-axis` represents the numerator, and the denominator is then the numerator divided by the legend's label.  For example, when `x-axis = 0.01` for the `/2` line, the ratio is `1.0% : 0.5%`.
 
 ![images/find_ratio.png](images/find_ratio.png)
-<center><b>Figure X</b> - Finding the best ratios to maximize label data using a window of <code>30</code> on ETHBTC 15 minute candles.</center>
+<center><b>Figure X</b> - Finding the best ratios to maximize label data using a window of <code>30</code> on ETHBTC 15-minute candles.</center>
 
-Unsurpringly, as the ratio grows or ratio multiple grows, fewer buy opportunities can be found in the data because there are fewer windows where high profits can be achieved and fewer windows where smaller stop losses don't get wicked out by the volatility of the market.  None of the plots reaches the goal of `50%` but the results provide plenty of options to avoid sparesly labeled data.  From this analysis, the ATR Ratio is maximized at `2:1` with approximately `40%` of the labels being `1`.  The percentage ratio is maximized at `1.0% : 0.5%` with approximately `27%` of the labels being `1`.
+Unsurprisingly, as the ratio grows or ratio multiple grows, fewer buy opportunities can be found in the data because there are fewer windows where high profits can be achieved and fewer windows where smaller stop losses don't get wicked out by the volatility of the market.  None of the plots reaches the goal of `50%` but the results provide plenty of options to avoid sparsely labeled data.  From this analysis, the ATR Ratio is maximized at `2:1` with approximately `40%` of the labels being `1`.  The percentage ratio is maximized at `1.0% : 0.5%` with approximately `27%` of the labels being `1`.
 
 ### Building Xy Datasets
 
-The imbalance of a dataset is not the only criteria for determining if if one ratio is better than another but it does give a sense.  To explore this further, several labeled datasets are generated with different labelling strategies by changing ratios, the window, and the whether the ratio represents a percentage or ATR ratio.  The following table shows 12 different labeled datasets generated that are used to compare different model performances.
+The imbalance of a dataset is not the only criteria for determining if one ratio is better than another, but it does give a sense.  To explore this further, several labeled datasets are generated with different labelling strategies by changing ratios, the window, and the whether the ratio represents a percentage or ATR ratio.  The following table shows 12 different labeled datasets generated that are used to compare different model performances.
 
 |dataset|use_atr|ratio|reverse|window|size|true_labels|imbalance|train_imbal|test_imbal|
 |:-|:-:|:-:|:-:|:-:|-:|-:|-:|-:|-:|
@@ -94,7 +102,7 @@ In 2017, Binance started reporting figures and it took some time for these to de
 
 ### Simulating Trades on Labeled Data
 
-To get a sense of what an ideal profit would look like for each of the labelling strategies, it is necessary to run them through a simulator.  Why is this necessary?  Why can't this be calculated from the above figures?  To answer this, imagine having two candles, one after another, where the labeling has marked both of these as `1`.  In a deployed model, when a buy signal is received, all available currency will be spent.  When evaluating the next candlestick data, the model will be evaluating for selling, not buying, so that candlestick will not be evaluated for a buy opportunity.
+To get a sense of what an ideal profit would look like for each of the labelling strategies, it is necessary to run them through a simulator.  Why is this necessary?  Why can't this be calculated from the above figures?  To answer this, imagine having two candles, one after another, where the labeling has marked both as `1`.  In a deployed model, when a buy signal is received, all available currency will be spent.  When evaluating the next candlestick data, the model will be evaluating for selling, not buying, so that candlestick will not be evaluated for a buy opportunity.
 
 The simulator logic is the same logic as in the deployed model pipeline but instead of looking at the predictions, it looks at the validation labeled data which is already guaranteed to contain profitable trades assuming it uses the same ratio and other hyperparameters as the dataset's labelling strategy.  The simulator works, in short, by progressing through the labeled data, looking for the next buy opportunity, calculates the target and stop loss prices, finds the next record that surpasses one of these, calculating the profit/loss along with any fees, and then repeats the process until it reaches the end.  The last sell indicates the maximized profit achievable for the dataset.  The below table shows how each dataset's number of trades and maximized profit based on a starting value of `1 ETH` and a fee of `0.1%` for each buy or sell transaction using the validation data.
 
@@ -113,7 +121,7 @@ The simulator logic is the same logic as in the deployed model pipeline but inst
 |20210806k|1097.0|6837.112001|0.0|
 |20210806l|1497.0|3921.842442|0.0|
 
-While the label data guarantees a trade is profitable, it doesn't guarantee the profit surpasses the fee amount.  For this reason, some labels result in bad trades.  In the above table, only the ATR ratio datasets result in bad trades which makes sense since all the percentage based datasets are larger than the fee.  Keeping an eye on this number will be important when using an ATR ratio dataset.
+While the label data guarantees a trade is profitable, it doesn't guarantee the profit surpasses the fee amount.  For this reason, some labels result in bad trades.  In the above table, only the ATR ratio datasets result in bad trades which makes sense since all the percentage-based datasets are larger than the fee.  Keeping an eye on this number will be important when using an ATR ratio dataset.
 
 ### Comparing Datasets with Base Classifiers
 
@@ -129,15 +137,15 @@ For each of the datasets, a set of base classifiers are trained.  Below is a tab
 |XGBClassifier|`n_jobs=-1, random_state=42, use_label_encoder=False`|
 |MLPClassifier|`random_state=42`|
 
-<small>One note about the `MLPClassifier`: since this classifier is senstive to scaling, `make_pipeline()` with `StandardScaler()` is used.</small>
+One note about the `MLPClassifier`: since this classifier is sensitive to scaling, `make_pipeline()` with `StandardScaler()` is used.
 
-This exercise determines the F1-score, precision, recall and the simulator's profit on the validation set for each dataset/classifer combination resulting in `84` results.  This was performed two more times on the same datasets and classifiers but first reducing the number of lookbacks from `14` to `3` and then to `0` thus reducing the number of features each time and ending up with a total of 252 trained model results.
+This exercise determines the F1-score, precision, recall and the simulator's profit on the validation set for each dataset/classifier combination resulting in `84` results.  This was performed two more times on the same datasets and classifiers but first reducing the number of lookbacks from `14` to `3` and then to `0` thus reducing the number of features each time and ending up with a total of 252 trained model results.
 
 ### Identifying Best Performing Dataset/Classifier Combinations
 
-When it comes to ranking best performance, precision is a good starting point.  A high precision means the model is able to reduce the number of false positives (FP).  In other words, it reduces the chance of predicting a buy opportunity that turns out to be unprofitable--the absolute worst case that should be avoided.  A low recall, on the other hand, just means the model is predicting fewer buy opportunties than expected.  This is generally fine so long as it does predict buys often enough (one true positive every couple of days on average).
+When it comes to ranking best performance, precision is a good starting point.  A high precision means the model has reduced the number of false positives (FP).  In other words, it reduced the chance of predicting a buy that is unprofitable--the absolute worst case that should be avoided.  A low recall, on the other hand, just means the model is predicting fewer buy opportunities than expected.  This is generally fine so long as it does predict buys often enough (one true positive every couple of days on average).
 
-Looking at precision alone can be misleading.  On the extreme side, a precision of `1.0` is perfect precision but if recall was very low, such as having only one `1` true positive (TP), the model would be ineffective since it so rarely makes predictions.  For this reason, the F1-score is not a good show of performance and several factors must be considered.  Maximizing precision and the number of TPs is the overall goal.  Ranking based on the number TPs does little in the way of explaining performance if the number of FPs is still high.  Therefore, ranking is performed first on precision, second on the difference between TPs and FPs and then on the ratio between .  The top 10 models based on this ranking is shown in the table below.
+Looking at precision alone can be misleading.  On the extreme side, a precision of `1.0` is perfect precision but if recall was very low, such as having only one `1` true positive (TP), the model would be ineffective since it so rarely makes predictions.  For this reason, the F1-score is not a good show of performance, and several factors must be considered.  Maximizing precision and the number of TPs is the overall goal.  Ranking based on the number TPs does little in the way of explaining performance if the number of FPs is still high. Therefore, ranking is performed first on precision, second on the difference between TPs and FPs and then on the ratio between. The top 10 models based on this ranking is shown in the table below.
 
 |Rank|Classifier|Dataset|Lookbacks|TP|FP|Diff|Ratio|Precision|Recall|Sim. Profit|
 |-:|:-|:-|-:|-:|-:|-:|-:|-:|-:|-:|
@@ -157,16 +165,9 @@ Reviewing the simulated profit for each of these, the top 7 all produce profits 
 
 ### Building a Logistic Regression Ensemble
 
-A large number of logistic regression models out performed other models and are easy to train and tune so it seems logical to ask if performance could be improved further with an ensemble.  To build an ensemble, the prediction from each model in the ensemble is weighted and summed and if that sum is greater than or equal to some threshold, the prediction would be considered a `1` or else `0`.  The weights will be the precision of each model on the validation set.  The equation for this can be explained as follows:
+Many logistic regression models outperformed other models and are easy to train and tune so it seems logical to ask if performance could be improved further with an ensemble.  To build an ensemble, the prediction from each model in the ensemble is weighted and summed and if that sum is greater than or equal to some threshold, the prediction would be considered a `1` or else `0`.  The weights will be the precision of each model on the validation set.  The equation for this can be explained as follows:
 
-\begin{align}
-x_{j} &= \sum_{i=0}^M \left( p_{m[i]} \cdot c_{m[i]}\right)
-\\
-r_{j} &= \begin{cases}
-1 & \text{if } x_{j} \geq t \\
-0 & \text{if } x_{j} < t \\
-\end{cases}
-\end{align}
+![images/eq_ensemble.png](images/eq_ensemble.png)
 
 Where $r_{j}$ is the prediction result for the $j$th record, $p_{m[i]}$ is the prediction of $i$th model in $m$, $c_{m[i]}$ is the precision of said model, and $t$ is the hyperparameter threshold.  Any model that has a validation set precision of `0` would always be zeroed out so these models will not be included in the ensemble.
 
@@ -177,34 +178,22 @@ Finding a good value for $t$ can be achieved by trying out by measuring the prec
 
 ### Scaling Data in Isolation
 
-There is a forex theory that a good strategy is generalizable, in that is can be applied to any currency pair, even opposite pairs, and be profitable.  All models previously train (with the exception of the MLP) have not been scaled so it is impractical to expect one of these models perform well for both ETH to BTC and the opposite BTC to ETH.  Likewise, using standard scaling, like done for the MLP, is also not practical since the dataset for BTC to ETH trades is scaled very differently.  So can the data be scaled in isolation?  The answer is yes, but at the cost of zeroing-out one of the features.  By defining the open price as the mean and using the close, high, and low in the calculation of a standard deviation, all price data can be scaled such that one standard deviation difference is -1 or 1.  The formula can be described as the following:
+There is a forex theory that a good strategy is generalizable, in that it can be applied to any currency pair, even opposite pairs, and be profitable.  All models previously train (except for the MLP) have not been scaled so it is impractical to expect one of these models perform well for both ETH to BTC and the opposite BTC to ETH.  Likewise, using standard scaling, like done for the MLP, is also not practical since the dataset for BTC to ETH trades is scaled very differently.  So, can the data be scaled in isolation?  The answer is yes, but at the cost of zeroing-out one of the features.  By defining the open price as the mean and using the close, high, and low in the calculation of a standard deviation, all price data can be scaled such that one standard deviation difference is -1 or 1.  The formula can be described as the following:
 
-\begin{align}
-\mu_{j} &= p_{j}^\text{open}
-\\
-\sigma_{j} &= \sqrt{\left(p_{j}^\text{close} - p_{j}^\text{open}\right)^2 + \left(p_{j}^\text{high} - p_{j}^\text{open}\right)^2 + \left(p_{j}^\text{low} - p_{j}^\text{open}\right)^2}
-\\
-p_{j} &= \begin{cases}
-\frac{\left(p_{j} - \mu_{j}\right)}{\sigma_{j}} & \text{if } p_{j} \text{ is a price} \\
-\frac{p_{j}}{p_{j}^\text{ATR}} & \text{if } p_{j} \text{ is an ATR difference} \\
-\frac{p_{j} - p_{j}^\text{ATR}}{p_{j}^\text{ATR}} & \text{if } p_{j} \text{ is an ATR lookback} \\
-\frac{p_{j}}{p_{j}^\text{RSI}} & \text{if } p_{j} \text{ is an RSI difference} \\
-\frac{p_{j} - 50}{20} & \text{if } p_{j} \text{ is an RSI or RSI lookback} \\
-\end{cases}
-\end{align}
+![images/eq_scaler.png](images/eq_scaler.png)
 
-Using this scaling algorithm, each record is individually scaled independent of the other data in the dataset.  Repeating the same model/dataset comparison using this scaler produces another 252 trained models.  Many of the logistic regression models returned profits in simulation of `ETHBTC` suggesting again an ensemble might out perform a single model.
+Using this scaling algorithm, each record is individually scaled independent of the other data in the dataset.  Repeating the same model/dataset comparison using this scaler produces another 252 trained models.  Many of the logistic regression models returned profits in simulation of `ETHBTC` suggesting again an ensemble might outperform a single model.
 
 ### Ensemble with Custom Scaling
 
-Using the scaler discussed previously, a new ensemble of logistic regression models can be produced with the goal of having a model that be able to perform on both `ETHBTC` and `BTCETH` trading.  Again, a threshold and ratio is brute forced.  In the below figure, profit is maximized at threshold of `0.10` with a value of `1.35` again surpassing any individual model simulation performance.  This time, the profit is maximized with a ratio of `4:2` in contrast with the highest precision dataset being `2:1`. 
+Using the scaler discussed previously, a new ensemble of logistic regression models can be produced with the goal of having a model that be able to perform on both `ETHBTC` and `BTCETH` trading.  Again, a threshold and ratio are brute forced.  In the below figure, profit is maximized at threshold of `0.10` with a value of `1.35` again surpassing any individual model simulation performance.  This time, the profit is maximized with a ratio of `4:2` in contrast with the highest precision dataset being `2:1`. 
 
 ![images/scaled_ensemble_find_t.png](images/scaled_ensemble_find_t.png)
 <center><b>Figure X</b> - Simulated precision, recall and profit for varying thresholds on a scaled Logistic Regression ensemble.</center>
 
 ### Deep Neural Network
 
-To see how a deep neural network can perform on the same datasets used to train base classifiers, the dataset `20210806i` is chosen for its consistent performance.  A variety of ResNet28 models are built using PyTorch and trained with varying hyperparameters or model changes over 20 epochs on a GPU to allow for quicker iteration.  A subset of these run configurations are shown in the table below.
+To see how a deep neural network can perform on the same datasets used to train base classifiers, the dataset `20210806i` is chosen for its consistent performance.  A variety of ResNet28 models are built using PyTorch and trained with varying hyperparameters or model changes over 20 epochs on a GPU to allow for quicker iteration.  A subset of these run configurations is shown in the table below.
 
 |Model Name|Scaler|Width|Optimizer|Learning Rate|
 |:-|:-|-:|:-|:-|
@@ -215,12 +204,12 @@ To see how a deep neural network can perform on the same datasets used to train 
 |nm_torch1_alpha37|CustomScaler1|32|AdamW|0.006|
 |nm_torch1_alpha38|CustomScaler1|128|AdamW|0.03|
 
-Below is a figure of the training and validations results of this subset of models.  While 20 epochs is still quite young for a comprehensive analysis, some trends do start to appear which only become more pronouned with futher epochs and as many as 100 when the training set begins to converge.
+Below is a figure of the training and validations results of this subset of models.  While 20 epochs is still quite young for a comprehensive analysis, some trends do start to appear which only become more pronounced with further epochs and as many as 100 when the training set begins to converge.
 
 ![images/resnet28_res.png](images/resnet28_res.png)
 <center><b>Figure X</b> - Simulated precision, recall and profit for varying thresholds on a scaled Logistic Regression ensemble.</center>
 
-The general trend that is consistent across all models is that the training loss drops predictably and consistently but the validation loss percipicely rises after just a few epochs.  The recall on the validation set generally does slowly improve which also improves the F1-score but the precision remains erratic, averaging around `0.5`.  This unexpected behavior is likely due to a shift in the how the `ETHBTC` market behaves over time so the model is learning a strategy that is no longer profitable in 2021.  To validate this, each model was simulated with the results in the below table.
+The general trend that is consistent across all models is that the training loss drops predictably and consistently but the validation loss steeply rises after just a few epochs.  The recall on the validation set generally does slowly improve which also improves the F1-score but the precision remains erratic, averaging around `0.5`.  This unexpected behavior is likely due to a shift in the how the `ETHBTC` market behaves over time, so the model is learning a strategy that is no longer profitable in 2021.  To validate this, each model was simulated with the results in the below table.
 
 |Model Name|Buys|Starting Value|Ending Value|
 |:-|-:|:-:|:-|
