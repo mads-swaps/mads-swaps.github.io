@@ -30,7 +30,78 @@ A candlestick chart is the standard plot used in visualizing trading activity wh
 
 # Feature Engineering
 
-# Strategies
+## Lookbacks
+
+Each record in the dataset represents a single candlestick's data.  Since context likely matters, a lookback feature is the candlestick data for a previous candlestick included with the current record.  A lookback can be for any feature already in the dataset.  For example, if a candlestick data is represented just by `open`, `close`, `high`, `low` price data.  A lookback of 1 could be something like this for a 2-record dataset:
+
+|index|open|close|high|low|open_1|close_1|high_1|low_1|
+|:-|-:|-:|-:|-:|-:|-:|-:|-:|
+|2021-07-29 01:00:00|0.057756|0.057657|0.057776|0.057576|--|--|--|--|
+|2021-07-29 01:00:00|0.057657|0.057697|0.057788|0.057612|0.057756|0.057657|0.057776|0.057576|
+
+
+## Indicators
+
+Indicators are non-Boolean numerical features that are calculated based on a window of data.
+
+### Moving Averages (MA)
+
+Moving averages are common indicators used in forex and can give insight into price trend or momentum by smoothing out the variations.  A moving average operates on a window which represents the average over a given number of records.  A typical value of `14` is used in forex and for this work three are used: `14`, `30` and `90`.
+
+The equation for moving average is the following where *k* is the window size on a dataset containing *N* items:
+
+![A](images/eq_ma.png)
+
+### Average True Range (ATR)
+
+The ATR is an indicator of volatility in the market.  A higher ATR and the price is more likely to jump around which can result in higher gains but at higher risk.  It is calculated by looking at the true range (TR) of the current record and then averaging out over a window typically of size `14`.  This is also useful determining target and stop loss prices which will be discussed in the different strategies.
+
+![A](images/eq_atr.png)
+
+### Relative Strength Index (RSI)
+
+The RSI is a momentum indicator that measures the magnitude of recent price changes.  The value is limited between `0` and `100`.  Traditionally, if the RSI value is above `70`, it is considered "overvalued" and the price may soon reverse.  A value below `30` is thus considered "undervalued".  The calculation for this is more complicated.  First the relative strength is found by comparing the exponential moving averages of the positive differences in closing price divided by the exponential moving averages of the negative differences in the closing price.  Then the value is normalized into an index between `0` and `100`.
+
+![A](images/eq_rsi.png)
+
+### Support and Resistance Lines
+
+Support and resistance are levels that act as barriers that prevent a price from either dropping below (support) or raising above (resistance) an expected price.  The levels can be horizontal or they can represent a trendline.  While there is no agreed formula, this feature dataset will use the `min` and `max`  in a given window.  Again, three windows will be used resulting in three features `14`, `30` and `90`.
+
+![A](images/eq_sr.png)
+
+## Signals
+
+Signals are Boolean features represented by either a `1` (True) or `0` (False).
+
+### Upward Trend
+
+Is the current record within the context of an upward trend?  To calculate this, the difference in moving average is used for a given window.
+
+![A](images/eq_ut.png)
+
+### Candlestick Patterns
+
+There are numerous candlestick patterns and each pattern tells a story of how the market is behaving and what that might mean for the future.  Their names often derive from their shape and the table below provides links to more information about the ones supported in this dataset.  The candlestick pattern signals are implemented according to the below algorithms.
+
+|Pattern Name|Indication|Image|Algorithm|
+|:-|:-|:-:|:-|
+|Shooting Star|Bearish Reversal|![I](images/cs_ss.png)|![A](images/eq_cs_ss.png) ![A](images/eq_cs_ssr.png)|
+|Hammer|Bullish Reversal|![I](images/cs_hm.png)|![A](images/eq_cs_hm.png) ![A](images/eq_cs_hmr.png) |
+|Bearish Harami|Bearish Reversal|![I](images/cs_brh.png)|![A](images/eq_cs_brh.png) |
+|Bullish Harami|Bullish Reversal|![I](images/cs_buh.png)|![A](images/eq_cs_buh.png) |
+|Engulfing Bullish|Bullish Reversal|![I](images/cs_ebu.png)|![A](images/eq_cs_ebu.png) |
+|Engulfing Bearish|Bearish Reversal|![I](images/cs_ebr.png)|![A](images/eq_cs_ebr.png) |
+
+## Other Features
+
+### Date and Time
+
+It's possible that certain days-of-the-week (DOW) or time-of-the-day (TOD) impact trading trends.  For this reason, DOW and TOD are added as features in a numerical format based on the candlestick's open time.  The DOW is represented by a number between `0` and `6` and the TOD is normalized between `0` and `1`.
+
+### Trading Volume
+
+Within the candlestick data that is coming from Binance there are five features that relate to trading volume.  This data is included, unaltered, as available features.  They include `number_of_trades`, `volume`, `quote_asset_volume`, `taker_buy_base_asset_volume`, and `taker_buy_quote_asset_volume`.
 
 # Strategies
 
