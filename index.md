@@ -50,25 +50,25 @@ Moving averages are common indicators used in forex and can give insight into pr
 
 The equation for moving average is the following where *k* is the window size on a dataset containing *N* items:
 
-![A](images/eq_ma.png)
+<p align="center"><img src='images/eq_ma.png' alt='images/eq_ma.png'></p>
 
 ### Average True Range (ATR)
 
 The ATR is an indicator of volatility in the market.  A higher ATR and the price is more likely to jump around which can result in higher gains but at higher risk.  It is calculated by looking at the true range (TR) of the current record and then averaging out over a window typically of size `14`.  This is also useful determining target and stop loss prices which will be discussed in the different strategies.
 
-![A](images/eq_atr.png)
+<p align="center"><img src='images/eq_atr.png' alt='images/eq_atr.png'></p>
 
 ### Relative Strength Index (RSI)
 
 The RSI is a momentum indicator that measures the magnitude of recent price changes.  The value is limited between `0` and `100`.  Traditionally, if the RSI value is above `70`, it is considered "overvalued" and the price may soon reverse.  A value below `30` is thus considered "undervalued".  The calculation for this is more complicated.  First the relative strength is found by comparing the exponential moving averages of the positive differences in closing price divided by the exponential moving averages of the negative differences in the closing price.  Then the value is normalized into an index between `0` and `100`.
 
-![A](images/eq_rsi.png)
+<p align="center"><img src='images/eq_rsi.png' alt='images/eq_rsi.png'></p>
 
 ### Support and Resistance Lines
 
 Support and resistance are levels that act as barriers that prevent a price from either dropping below (support) or raising above (resistance) an expected price.  The levels can be horizontal or they can represent a trendline.  While there is no agreed formula, this feature dataset will use the `min` and `max`  in a given window.  Again, three windows will be used resulting in three features `14`, `30` and `90`.
 
-![A](images/eq_sr.png)
+<p align="center"><img src='images/eq_sr.png' alt='images/eq_sr.png'></p>
 
 ## Signals
 
@@ -78,7 +78,7 @@ Signals are Boolean features represented by either a `1` (True) or `0` (False).
 
 Is the current record within the context of an upward trend?  To calculate this, the difference in moving average is used for a given window.
 
-![A](images/eq_ut.png)
+<p align="center"><img src='images/eq_ut.png' alt='images/eq_ut.png'></p>
 
 ### Candlestick Patterns
 
