@@ -295,14 +295,14 @@ Statistical Arbitrage strategy uses mean reversion principle to take advantage o
 ## Cointegration
 To develop mathematical models that best describe the data, we perform time series analysis. Such analysis usually involves methods like ordinary least squares with a key assumption that the statistical properties of the time series such as variances and means are constant. Non-stationary time series (or unit root variables) fail to meet this assumption. Therefore, these time series need to be analyzed with a different method called **cointegration**. More formally, the series $X_t$ and $Y_t$ are cointegrated if there exist a linear combination of them which is *stationary* i.e:   
 
-$ \exists (\alpha, \beta) : \alpha X_t + \beta Y_t = \epsilon_t $
+![formula1.JPG](images/formula1.JPG)
 where $\epsilon_t$ is a *stationary* time series.
 
 ## Test for Cointegration
 Intuitively, some linear combination of the time series removes most of auto-covarance and is mostly white noise, which is useful for pairs trading. Since the linear combination of prices of different assets is white noise, we can bet on this relationship to mean revert and trade accordingly.
 
 In the case of pair trading we are interested in, we express the linear combination in terms of spread:
-$$\epsilon_t = X_t - h_tY_t $$
+![formula2.JPG](images/formula2.JPG)
 where we inserted a minus sign to express that we will be long one asset and short another, so that $h$ defined is usually positive. If the spread is stationary, we can say that the currency pairs are cointegrated. 
 
 We use **Engle-Granger two-step method** to check whether the spread is stationary. It invovles the following: 1) Regressing one series on another to estimate the stationary long-tern relationship  2) Applying an **Augmented Dickey-Fuller (ADF)** unit-root test to the regression residual.This test is implemented in `statsmodels.tsa.stattools.coint`.
