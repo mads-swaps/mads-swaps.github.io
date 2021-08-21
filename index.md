@@ -285,6 +285,53 @@ The general trend that is consistent across all models is that the training loss
 |nm_torch1_alpha37|3083|1.0|0.4240|
 |nm_torch1_alpha38|236|1.0|0.9454|
 
+# Statistical Arbitrage
+## What is Statistical Arbitrage
+Statistical Arbitrage, also known as stat arb, refers to trading strategies that uses statistical techniques to profit from patterns between financial instruments. Gerry Bamberger developed the first arbitrage strategy using pairs trading at Morgan Stanley in the 1980s. There are multiple types of Statistical Arbitrage. Market Neutral Arbitrage, Cross Asset Arbitrage and Cross Market Arbitrage are most commonly used. Since we are focusing on cryptocurrency spot market and the product type is similar to vanilla FX without other underlyings, Market Neutral Arbitrage is the natural choice for building a portfolio with multiple bitcoin pairs. As its name suggests, the returns of Market Neutral Arbitrage strategy are not affected by the market's price movment. Hence, it is market-netural with a beta of zero. 
+
+## Mean Reversion Strategy and Pairs Trading
+Statistical Arbitrage strategy uses mean reversion principle to take advantage of the price inefficiencies between a group of securities. For instance, if you have a pair of instruments that share similar fundamentals and belong to the same sectors, even though in the short term the price may fluctuate, it is expected that these instruments behave similarly and the ratio or spread of such instruments to remain constant. Based on the mean reversion principle, if one instrument outperforms the other, it is temporary and will converge to the normal level in time. You can execute pairs trading to buy the underperforming instrument and sell the outperforming instrument.
+
+## Cointegration
+To develop mathematical models that best describe the data, we perform time series analysis. Such analysis usually involves methods like ordinary least squares with a key assumption that the statistical properties of the time series such as variances and means are constant. Non-stationary time series (or unit root variables) fail to meet this assumption. Therefore, these time series need to be analyzed with a different method called **cointegration**. More formally, the series $X_t$ and $Y_t$ are cointegrated if there exist a linear combination of them which is *stationary* i.e:   
+
+$ \exists (\alpha, \beta) : \alpha X_t + \beta Y_t = \epsilon_t $
+where $\epsilon_t$ is a *stationary* time series.
+
+## Test for Cointegration
+Intuitively, some linear combination of the time series removes most of auto-covarance and is mostly white noise, which is useful for pairs trading. Since the linear combination of prices of different assets is white noise, we can bet on this relationship to mean revert and trade accordingly.
+
+In the case of pair trading we are interested in, we express the linear combination in terms of spread:
+$$\epsilon_t = X_t - h_tY_t $$
+where we inserted a minus sign to express that we will be long one asset and short another, so that $h$ defined is usually positive. If the spread is stationary, we can say that the currency pairs are cointegrated. 
+
+We use **Engle-Granger two-step method** to check whether the spread is stationary. It invovles the following: 1) Regressing one series on another to estimate the stationary long-tern relationship  2) Applying an **Augmented Dickey-Fuller (ADF)** unit-root test to the regression residual.This test is implemented in `statsmodels.tsa.stattools.coint`.
+
+We choose five coins which are Bitcoin(BTC/USDT), Ethereum(ETH/USDT), Cardano(ADA/USDT), Ripple(XRP/USDT) and Binance Coin(BNB/USDT). The Engle-Granger test suggests that 3 pairs are cointegrated for a threshold of $\alpha=0.05$. Below heatmap shows the p-values of the cointegration test between each pair of coins.
+
+![testheatmap.JPG](images/testheatmap.JPG)
+
+## Trading Strategy with spread
+In order to calculate the spread, we use a linear regression to get the beta coefficient. This coefficient can be interpreted as the hedge ratio to make the portfolio of the two coins stationary. In pair trading, we long one coin and simulataneously short *hedge ratio* number of the other coin so that the linear combination of the two coins is stationary. As cryptocurrency market is very volatile, it is more accurate to use rolling beta derived from Rolling Ordinary Least Square (RollingOLS) in order to estimate a hedge ratio that can vary with time. 
+
+In the stock market, the price ratio of the prices $\frac{S_1}{S_2}$ is often used as a signal. The problem is that the ratio is not necessarily stationary or might not remain stationary throughout the period. And this is a problem we encountered: as we used the price ratio instead of a dynamically chnaging hedge ratio, the two assets stopped being cointegrated after a while and observed some large losses in our daily P&L calculation.
+
+The absolute spread is less helpful as the prices of coins can be very different in scale. Thus, we normalize the spread by transforming it to a z-score and use this z-score to derive our trading signal:
+
+1. We enter a long (resp. short) position if the spread is below (resp. above) one, which means that the spread has moved one standard deviation below (resp. above) its moving average.  
+
+2. We exit trades when the spread changes sign which signals a mean reversion. 
+
+Let's focus on the cointegrated pair (ETH/USDT, ADA/USDT) and visualize the price series, rolling beta, z-score and the performance of the strategy against the benchmark (buy and hold). As explained above, we use statistics based on rolling windows to incorporate more recent data - a short window of one hour to smooth-out the current spread information, a long window of 12 hours as a measure of the rolling mean as well as a 12 hours rolling standard deviation. The strategy outperforms buy and hold individual coins excluding costs. 
+
+![pairtrading1.JPG](images/pairtrading1.JPG)
+![pairtrading2.JPG](images/pairtrading2.JPG)
+
+## Risks of Statistical Arbitrage
+Statistical arbitrage models contain both *systemic* and *idiosyncratic* risks. As a result of economy and market condition, cointegrated cryptocurrencies can stop cointegrate at some point in time. In our case, the cointegration hypothesis is not validated on the out-sample data (30% of the data history) at 10% threshold - recall that the same hypothesis cannot be rejected at 5% threshold on the in-sample data. As a matter of fact, the same strategy proves to be not as profitable as a buy and hold in each individual coin. Thus, it is important to make sure that such a relationship persists during the time period of interest. Another challenge is that once enough players discover the statistical relationship, the arbitrage opportunities usually diminish or simply disappear.
+
+![pairtrading3.JPG](images/pairtrading3.JPG)
+
 # AWS Infrastructure
 
 # Evaluation
