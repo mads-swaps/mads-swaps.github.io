@@ -420,3 +420,11 @@ Amazon CloudWatch is AWS's monitoring service.  Logs from various services are s
 # Evaluation
 
 # Next Steps
+
+## Statistical Arbitrage Simulation
+
+Currently, the simulation framework only provides data and features for the cryptocurrency pair that its environment specifies.  Unfortunately, the statistical arbitrage method requires additional data to be passed into the simulation function for it to be able to make predictions.  The ability to pass data from other pairs was out of scope and although it was required for the statistical arbitrage method, we were unable to fit it in before submission.  With the current simulation framework, the additional data required can be requested through an optional parameters or fetched directly from the database in the prediction method.
+
+## Paper Trading on Binance
+
+Binance offers a Demo Exchange to test strategies using virtual capital.  By building support for this Demo Exchange, we can get more realistic fees and slippage and allow us to evaluate our best strategies with better confidence.  The Demo Exchange supports API calls.  A potential implementation method for this is to set up a new SQS queue with the purpose of executing trades on the Demo Exchange, then it will require minimal changes on the current simulation function - only sending a message whenever a strategy calls for a buy or sell action.  Additional checking on the execution and validation of such actions can be done on a separate trading function which is specifically built.  In addition to that, we can also pull out the current simulation code as a dummy exchange and plug in exchanges as a parameter for the environment, allowing for additional exchanges to be added in the future.
