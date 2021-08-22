@@ -339,6 +339,84 @@ Statistical arbitrage models contain both *systemic* and *idiosyncratic* risks. 
 
 # AWS Infrastructure
 
+The team was provided with 600 USD worth of AWS credits for this project and a decision was made to create a scalable production environment where it is easy to deploy changes without having to worry too much about provisioning and managing hardware.
+
+<p align="center"><img src='images/simple_diagram.png' alt='Simplified diagram of AWS services used for data acquisition and simulation'></p>
+<center><b>Figure X</b> - Simplified diagram of AWS services used for data acquisition and simulation.</center>
+
+## Amazon Relational Database Service
+
+Amazon RDS is a managed database service on AWS.  The PostgreSQL engine was chosen for this project due to each of the team members having experience with it.  Although the performance was not the best, an instance size of t2.micro was sufficient with the current dataset size and loading based on simulation usage.
+
+The RDS database consists of 7 tables:
+
+| Table Name | Description |
+| --- | --- |
+| pairs | Defines the currency pair information |
+| candlestick_15m | The raw 15m candlestick data |
+| features | Engineered features based candlestick data |
+| environment | Defines the simulation environment, such as starting funds, fee structures and the currency pair |
+| strategy | Defines the trading strategy configurations and parameters |
+| simulation | Defines the simulation based on an environment and a strategy, while keeping track of persistent variables. |
+| simulation_records | Historical records of all period for each simulation. |
+
+<p align="center"><img src='images/rds.png' alt='ER Diagram of the Database'></p>
+<center><b>Figure X</b> - ER Diagram of the Database.</center>
+
+The SQL files to recreate the database is available at [https://github.com/mads-swaps/swap-for-profit/tree/main/aws/rds](https://github.com/mads-swaps/swap-for-profit/tree/main/aws/rds).
+
+## AWS Lambda and the Serverless Application Model
+
+AWS Lambda is a managed serverless compute service.  Lambda was chosen over Elastic Compute Cloud (EC2) because of the nature of the data and simulation, where the majority of the computations are performed at regular intervals with long idling periods in between.  As opposed to EC2, Lambda excels at automatic scaling and its pricing scheme matches perfectly with the spiky computational load.  With the Lambda setup, hundreds of simulations can be done in seconds while it takes up to minutes to do the same with EC2.
+
+To deploy the Lambda functions, the AWS Serverless Application Model (SAM) framework was used.  The SAM framework automatically manages AWS infrastructures through configuration files.  Once configured, Lambda functions and its settings, security, and network configurations can be updated and deployed automatically through a few commands.  For this project, the Lambda functions are packaged as container images and uploaded to the Amazon Elastic Container Registry, allowing for easy rollback to previous versions if necessary.
+
+## Amazon Simple Storage Service, Elastic File System, and DataSync
+
+Amazon S3 and EFS are both managed storage service on AWS.  The main difference is that S3 is an object store while EFS is a file system for compute services.  Both storage services are used as they provide different benefits in the workflow.
+
+|  | S3 | EFS |
+| --- | --- | --- |
+| Versioning | Yes | No |
+| File management | Anytime directly through AWS console or GUI and CLI clients | Must be mounted by a compute service such as EC2 with remote file transfer service to make changes |
+| File system access | Objects must be copied to local file system before use | Can be accessed directly once mounted |
+
+As such, S3 is much simpler for the team to make changes to model assets such as pre-trained classifier, neural networks, and scalers.  On the other hand, EFS works more efficiently with the Lambda functions by not needing to copy assets everytime the function has a cold start.  To combine the convenience of S3 and efficiency of EFS, a synchronizing task was created using Amazon DataSync to copy the S3 files to the EFS drive.  Although not configured as such, it is possible to set the task to automatically execute everytime objects in the S3 buckets were updated, making it a fully automated process.
+
+## Amazon Simple Queue Service
+
+The Simple Queue Service (SQS) is a managed message queuing service on AWS.  It can be used to send and receive message within distributed systems, and, in this case, serverless applications.  SQS was chosen for how easy it is to set a queue up as well as its trigger integration with Lambda functions.  In this project, a single queue was used to a trigger the simulation Lambda function.  When a completed candlestick data for a particular cryptocurrency pair is received, the Binance Crawler Lambda enqueues the corresponding simulations to the queue.
+
+## Detailed Flow Diagram
+
+Here is the detailed flow diagram of the AWS architecture used for data acquisition and simulation.
+
+<p align="center"><img src='images/detail_diagram.png' alt='Detailed diagram of AWS services used for data acquisition and simulation'></p>
+<center><b>Figure X</b> - Detailed diagram of AWS services used for data acquisition and simulation.</center>
+
+The main flows are:
+
+| Flow | Description | Results |
+| --- | --- | --- |
+| Scheduler triggering Binance Crawler Function | A scheduler triggers the crawler periodically to get new candlestick data.  Any data that is updated will be saved to the database, with the latest (not yet closed) candlestick data marked as such. | If the `open_time` for the latest candlestick changed, additional simulation messages are queued for the simulation function. |
+| Database triggers | Multiple database triggers are used to automatically generate features once a candlestick is closed. | As the triggers are performed before the records are created, these features are created before the crawler enqueues the simulation messages. |
+| Deploy model assets | New models can be deployed without having to redeploy the Lambda functions by uploading the files to S3 and executing the DataSync task. | With about a 2-3 minute wait time, the new assets will be deployed to the EFS accessible by the Lambda functions. |
+| Configure simulation | Configurations for simulations can be done directly in the `strategy`, `environment` and `simulation` database tables, with custom parameters specified for each strategy. | Once the simulation entries are setup, it will automatically run starting from the beginning during the next period. |
+
+## Amazon QuickSight
+
+Amazon QuickSight is a business intelligence service.  It provides similar features with that of Power BI and Tableau, but has a tigher integration with the Amazon ecosystem, such as directly accessing data from Amazon RDS.  For this project, QuickSight was used to visualize ongoing cumulative returns for each simulation, with additional interactive features such as filtering and grouping for further comparisons.
+
+<p align="center"><img src='images/quicksight.png' alt='Amazon QuickSight'></p>
+<center><b>Figure X</b> - Amazon QuickSight visualization.</center>
+
+## Amazon CloudWatch
+
+Amazon CloudWatch is AWS's monitoring service.  Logs from various services are sent to CloudWatch, where you can examine the entires individually or visually as a group.  Dashboards can be created for a centralized view of all related services and alerts can be configured for when certain thresholds are exceeded.  A dashboard was created to monitoring RDS, SQS, and Lambda's metrics and performances.  Periodic spikes can be observed due to regularity of incoming candlestick data and resulting simulation computations.
+
+<p align="center"><img src='images/cloudwatch.png' alt='Amazon Cloudwatch'></p>
+<center><b>Figure X</b> - Amazon CloudWatch monitoring dashboard showing syste under regular load and usage.</center>
+
 # Evaluation
 
 # Next Steps
