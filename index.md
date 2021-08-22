@@ -26,7 +26,15 @@ A candlestick chart is the standard plot used in visualizing trading activity wh
 <p align="center"><img src='images/15min_candle.png' alt='images/15min_candle.png'></p>
 <center><b>Figure X</b> - Here is an example 15-minute candlestick chart for the Ethereum/Bitcoin cryptocurrency exchange rate.<br>This visualization was rendered using the Python library <a href='https://github.com/matplotlib/mplfinance'><code>mplfinance</code></a>.</center>
 
-# Data Acquisition
+# Data
+
+## Data Source
+
+In cryptocurrency, “trading pairs” or “cryptocurrency pairs” are assets that can be traded for each other on an exchange.  In this project, candlestick data provided by Binance was used.   The decision to use 15 minute candlestick data was made to strike a balance between having a practical dataset size to work with and a frequency which isn’t too sparse or too overwhelming.  There are actually two ways to obtain the candlestick data from Binance, one is through the Binance Data Listing at https://data.binance.vision/, another is through its API defined at:https://github.com/binance/binance-public-data/.
+
+## Manual Data Acquisition
+
+For the initial EDA process, a notebook was created to automatically fetch and merge data from Binance into a Dataframe.  The notebook is available at [https://github.com/mads-swaps/swap-for-profit/blob/main/fetch_data/binance_fetch_klines.ipynb](https://github.com/mads-swaps/swap-for-profit/blob/main/fetch_data/binance_fetch_klines.ipynb), and simple configuration changes allows data from different trading pair symbols and candlestick periods to be easily downloaded.  With this data, we were able to perform initial feature engineering, target variable creation and test out some simple models.
 
 # Feature Engineering
 
