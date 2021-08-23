@@ -329,7 +329,7 @@ In the case of pairs trading, the linear combination is expressed in terms of sp
 
 **Engle-Granger two-step method** is used to check whether the spread is stationary. It involves the following: 
 1) Regressing one series on another to estimate the stationary long-term relationship  
-2) Applying an **Augmented Dickey-Fuller (ADF)** unit-root test to the regression residual.This test is implemented in `statsmodels.tsa.stattools.coint`.
+2) Applying an **Augmented Dickey-Fuller (ADF)** unit-root test to the regression residual. This test is implemented in `statsmodels.tsa.stattools.coint`.
 
 Five coins are selected, which are Bitcoin(BTC/USDT), Ethereum(ETH/USDT), Cardano(ADA/USDT), Ripple(XRP/USDT) and Binance Coin(BNB/USDT). The Engle-Granger test suggests that 3 pairs are cointegrated for a threshold of *alpha=0.05*. The below heatmap shows the p-values of the cointegration test between each pair of coins.
 
