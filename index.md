@@ -347,12 +347,12 @@ The absolute spread is less helpful as the prices of coins can be very different
 Let's focus on the cointegrated pair (ETH/USDT, ADA/USDT) and visualize the price series, rolling beta, z-score, and the performance of the strategy against the benchmark (buy and hold). As explained above, statistics based on rolling windows is used to incorporate more recent data - a short window of one hour to smooth out the current spread information, a long window of 12 hours as a measure of the rolling mean as well as a 12 hours rolling standard deviation. The strategy outperforms buy and hold individual coins excluding costs.
 
 ![p1.png](images/p1.png)
-![pairtrading2.JPG](images/pairtrading2.JPG)
+![p2.png](images/p2.png)
 
 ## Risks of Statistical Arbitrage
 Statistical arbitrage models contain both *systemic* and *idiosyncratic* risks. As a result of the economy and market conditions, cointegrated cryptocurrencies can stop cointegrate at some point in time. In this case, the cointegration hypothesis is not validated on the out-sample data (30% of the data history) at 10% threshold - recall that the same hypothesis cannot be rejected at 5% threshold on the in-sample data. As a matter of fact, the same strategy proves to be not as profitable as a buy and hold in each individual coin. Thus, it is important to make sure that such a relationship persists during the time period of interest. Another challenge is that once enough players discover the statistical relationship, the arbitrage opportunities usually diminish or simply disappear.
 
-![pairtrading3.JPG](images/pairtrading3.JPG)
+![p3.png](images/p3.png)
 
 
 # Momentum Trading
