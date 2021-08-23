@@ -423,6 +423,7 @@ The main flows are:
 | Database triggers | Multiple database triggers are used to automatically generate features once a candlestick is closed. | As the triggers are performed before the records are created, these features are created before the crawler enqueues the simulation messages. |
 | Deploy model assets | New models can be deployed without having to redeploy the Lambda functions by uploading the files to S3 and executing the DataSync task. | With about a 2-3 minute wait time, the new assets will be deployed to the EFS accessible by the Lambda functions. |
 | Configure simulation | Configurations for simulations can be done directly in the `strategy`, `environment`, and `simulation` database tables, with custom parameters specified for each strategy. | Once the simulation entries are set up, the simulation will automatically run starting from the beginning during the next period. |
+| Running the simulation | Simulations are triggered whenever a completed period of candlestick data is processed.  Simulation details are updated into the simulation records and the QuickSight dashboard is automatically updated with the latest data. | The simulation lambda is triggered from SQS messages enqueued by the crawler lambda. |
 
 ## Amazon QuickSight
 
