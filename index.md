@@ -41,6 +41,7 @@ In the initial EDA, a notebook was created to automatically fetch and merge data
 Below is an example of the data provide by the Binance API for a specific currency pair.
 
 |Open Time|Open Price|High Price|Low Price|Close Price|Volume|Close Time|Quote Asset Volume|Number of Trades|Taker Buy Base Asset Volume|Taker Buy Quote Asset Volume|
+|:-|-:|-:|-:|-:|-:|:-|-:|-:|-:|-:|
 |2017-07-14 04:00:00+00:00|12.500000|12.500000|11.574074|11.574074|0.728274|2017-07-14 04:14:59.999|8.752|26|0.282355|3.268|
 |2017-07-14 04:15:00+00:00|11.724841|11.747016|11.627907|11.653518|5.217079|2017-07-14 04:29:59.999|61.042|33|0.235027|2.738|
 |2017-07-14 04:30:00+00:00|11.653518|11.653518|11.576754|11.585606|4.631740|2017-07-14 04:44:59.999|53.769|41|1.829643|21.225|
