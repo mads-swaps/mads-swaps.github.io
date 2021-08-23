@@ -317,7 +317,7 @@ Statistical Arbitrage strategy uses mean reversion principle to take advantage o
 ## Cointegration
 To develop mathematical models that best describe the data, we perform time series analysis. Such analysis usually involves methods like ordinary least squares with a key assumption that the statistical properties of the time series such as variances and means are constant. Non-stationary time series (or unit root variables) fail to meet this assumption. Therefore, these time series need to be analyzed with a different method called **cointegration**. More formally, the series $X_t$ and $Y_t$ are cointegrated if there exists a linear combination of them which is *stationary* i.e:   
 
-![f12.png](images/f12.png) ,where $\epsilon_t$ is a *stationary* time series.
+![ff00.png](images/ff00.png) ,where $\epsilon_t$ is a *stationary* time series.
 
 ## Test for Cointegration
 Intuitively, some linear combination of the time series removes most of the auto-covarance and is mostly white noise, which is useful for pairs trading. Since the linear combination of prices of different assets is white noise, we can bet on this relationship to mean revert and trade accordingly.
