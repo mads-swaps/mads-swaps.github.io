@@ -408,7 +408,9 @@ S3 provides a simplier interface for uploading model assets such as pre-trained 
 
 When the `BinanceCrawlerFunction` Lambda processes a complete candlestick for a particular cryptocurrency pair, it enqueues that pair's simulation task on a queue in AWS's Simple Queue Service (SQS).  This queue then triggers the `SwapSimulationFunction` Lambda with the pair ID as its parameter. SQS was chosen for how setup ease as well as its integration with Lambda functions.
 
-The compmleted flow of the AWS architecture can be seen below:
+## Detailed Flow Diagram
+
+The completed flow of the AWS architecture can be seen below:
 
 <p align="center"><img src='images/detail_diagram.png' alt='Detailed diagram of AWS services used for data acquisition and simulation'></p>
 <center><b>Figure X</b> - Detailed diagram of AWS services used for data acquisition and simulation.</center>
