@@ -382,7 +382,14 @@ The SQL files to recreate the database are available [here](https://github.com/m
 
 AWS Lambda, a managed serverless service, was selected as the primary compute resource to handle the cloud computing that keeps the database up-to-date and the simulations running.  Lambda was selected instead of Elastic Compute Cloud (EC2) because of the nature of the data and simulation, where the majority of the computations are performed at regular intervals with long idling periods in between.  As opposed to EC2, Lambda excels at automatic scaling and its pricing scheme matches with spikes in computational load.  With the Lambda setup, hundreds of simulations can be done in seconds while it takes up to minutes to do the same with a similary specified EC2 resource.
 
-To deploy the Lambda functions, the AWS Serverless Application Model (SAM) framework is used.  The SAM framework automatically manages AWS infrastructures through configuration files.  Once configured, Lambda functions and its settings, security, and network configurations can be updated and deployed automatically.  The Lambda functions are packaged as container images and uploaded to the Amazon Elastic Container Registry, allowing for version co                                                                      ntrol.
+To deploy the Lambda functions, the AWS Serverless Application Model (SAM) framework is used.  The SAM framework automatically manages AWS infrastructures through configuration files.  Once configured, Lambda functions and its settings, security, and network configurations can be updated and deployed automatically.  The Lambda functions are packaged as container images and uploaded to the Amazon Elastic Container Registry, allowing for version control.
+
+The following Lambdas perform the AWS compute:
+
+| Function Name | Purpose | Triggered By |
+|:-|:-|:-|
+| BinanceCrawlerFunction  | Fetch Binance candlestick data | Scheduler (every 3 minutes) |
+| SwapSimulationFunction  | Run simulations  | AWS SQS (complete candlestick) |
 
 ## Amazon Simple Storage Service, Elastic File System, and DataSync
 
@@ -398,13 +405,9 @@ S3 provides a simplier interface for uploading model assets such as pre-trained 
 
 ## Amazon Simple Queue Service
 
-AWS Lambda functions need to be triggered by an event so AWS's Simple Queue Service (SQS) is used was configured to fulfill this necessary task.  A single queue was used to trigger the simulation Lambda function.  When a completed candlestick data for a particular cryptocurrency pair is received, the Binance Crawler Lambda enqueues the corresponding simulations to the queue.
+When the `BinanceCrawlerFunction` Lambda processes a complete candlestick for a particular cryptocurrency pair, it enqueues that pair's simulation task on a queue in AWS's Simple Queue Service (SQS).  This queue then triggers the `SwapSimulationFunction` Lambda with the pair ID as its parameter. SQS was chosen for how setup ease as well as its integration with Lambda functions.
 
- to  is a managed message queuing service on AWS.  It can be used to send and receive message within distributed systems, and, in this case, serverless applications.  SQS was chosen for how easy it is to set a queue up as well as its trigger integration with Lambda functions.  In this project, a single queue was used to a trigger the simulation Lambda function.  When a completed candlestick data for a particular cryptocurrency pair is received, the Binance Crawler Lambda enqueues the corresponding simulations to the queue.
-
-## Detailed Flow Diagram
-
-Here is the detailed flow diagram of the AWS architecture used for data acquisition and simulation.
+The compmleted flow of the AWS architecture can be seen below:
 
 <p align="center"><img src='images/detail_diagram.png' alt='Detailed diagram of AWS services used for data acquisition and simulation'></p>
 <center><b>Figure X</b> - Detailed diagram of AWS services used for data acquisition and simulation.</center>
@@ -420,14 +423,14 @@ The main flows are:
 
 ## Amazon QuickSight
 
-Amazon QuickSight is a business intelligence service.  It provides similar features with that of Power BI and Tableau, but has a tigher integration with the Amazon ecosystem, such as directly accessing data from Amazon RDS.  For this project, QuickSight was used to visualize ongoing cumulative returns for each simulation, with additional interactive features such as filtering and grouping for further comparisons.
+Amazon QuickSight is a business intelligence service.  It provides similar features with that of Power BI and Tableau, but has a tighter integration with the AWS ecosystem, such as directly accessing data from the RDS.  For this project, QuickSight was used to visualize ongoing cumulative returns for each simulation, with additional interactive features such as filtering and grouping for further comparisons.
 
 <p align="center"><img src='images/quicksight.png' alt='Amazon QuickSight'></p>
 <center><b>Figure X</b> - Amazon QuickSight visualization.</center>
 
 ## Amazon CloudWatch
 
-Amazon CloudWatch is AWS's monitoring service.  Logs from various services are sent to CloudWatch, where you can examine the entires individually or visually as a group.  Dashboards can be created for a centralized view of all related services and alerts can be configured for when certain thresholds are exceeded.  A dashboard was created to monitoring RDS, SQS, and Lambda's metrics and performances.  Periodic spikes can be observed due to regularity of incoming candlestick data and resulting simulation computations.
+Amazon CloudWatch is AWS's monitoring service.  Logs from various services are sent to CloudWatch, where entires individually or visually as a group can be examined.  Dashboards can be created for a centralized view of all related services and alerts can be configured for when certain thresholds are exceeded.  A dashboard was created to monitoring RDS, SQS, and Lambda's metrics and performances.  Periodic spikes can be observed due to regularity of incoming candlestick data and resulting simulation computations.
 
 <p align="center"><img src='images/cloudwatch.png' alt='Amazon Cloudwatch'></p>
 <center><b>Figure X</b> - Amazon CloudWatch monitoring dashboard showing syste under regular load and usage.</center>
@@ -443,3 +446,23 @@ Currently, the simulation framework only provides data and features for the cryp
 ## Paper Trading on Binance
 
 Binance offers a Demo Exchange to test strategies using virtual capital.  By building support for this Demo Exchange, we can get more realistic fees and slippage and allow us to evaluate our best strategies with better confidence.  The Demo Exchange supports API calls.  A potential implementation method for this is to set up a new SQS queue with the purpose of executing trades on the Demo Exchange, then it will require minimal changes on the current simulation function - only sending a message whenever a strategy calls for a buy or sell action.  Additional checking on the execution and validation of such actions can be done on a separate trading function which is specifically built.  In addition to that, we can also pull out the current simulation code as a dummy exchange and plug in exchanges as a parameter for the environment, allowing for additional exchanges to be added in the future.
+
+# Statement of work
+
+<dl>
+    <dt>Nicholas Miller</dt>
+    <dd>Feature engineering</dd>
+    <dd>Target and stoploss</dd>
+    <dd>Training and evaluation</dd>
+    <dd>Final report</dd>
+    <dt>Sophie Deng</dt>
+    <dd>Statistical arbitrage</dd>
+    <dd>Zipline momenetum modeling</dd>
+    <dd>Training and evaluation</dd>
+    <dd>Final report</dd>
+    <dt>Tim Chen</dt>
+    <dd>Data collection</dd>
+    <dd>Feature engineering</dd>
+    <dd>AWS setup and maintenance</dd>
+    <dd>Final report</dd>
+</dl>
