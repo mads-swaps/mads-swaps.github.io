@@ -351,6 +351,38 @@ Statistical arbitrage models contain both *systemic* and *idiosyncratic* risks. 
 
 ![pairtrading3.JPG](images/pairtrading3.JPG)
 
+
+# Momentum Trading
+Momentum trading evaluates the strength of an asset's current trend to buy an asset while the price is rising and sell it at peak price before the asset's price starts to lose its momentum. This strategy perfectly reflects the common expression that "trend is your friend." By following the trend signals, volatile market like cryptocurrency can be profitable for short-term gains through a consistent buy and sell action.
+
+For example, when ETH/BTC increases in price, it attracts more attention from traders. This in turn pushes the price even higher. Sometimes, the sentiment called a fear of missing out (FOMO) would cause the price to increase for much longer than expected based on fundamental analysis until a large number of traders believe that the price is overbought and start to sell off. That is when the trend reversal happens.The new downtrend is also a momentum trading opportunity where traders enter the market by going short.
+
+## How to measure momentum
+The above mentioned indicators such as MA, ATR and RSI are considered as alpha factors resulting from transforming raw market data using arithmetic and are effective features for the momentun strategy. However, in this section lagged returns, momentum, volatility and distance are used as features for logistic regression.
+
+## Features
+- **Lagged returns**: In addition to calculating most recent ($t$ and $t-1$) return, more information about the strength of the cryptocurrency can be extracted from returns calculated using price data dated further back in time. For example, `lag = 3` creates three features with 1, 2, and 3 lookback period.  
+
+- **Momentum**: Momentum is defined as the rolling mean of returns using a pre-defined window that captures recent change in return.
+
+- **Volatility**: Volatility is defined as the rolling standard deviation of returns using a pre-defined window that is usually longer than that of momentum.
+
+- **Distance**: Distance measures how far price has moved from its average value. It is the difference between price and its rolling mean.
+
+## Signals
+Signals based on the most recent return are binarized outcomes: 1 if return is positive, 0 otherwise. More precisely the label $y$ is encoded as:
+
+![m_equation.png](images/m_equation.png)
+
+## Time series and cross-validation
+Cross-validation (CV) is a method for model selection. The main idea behind CV is to split the data several times so that each split is used once as a validation set and the remainder as a training set. A key assumption of CV is that the data is **independently and identically distributed (IID)**. However, financial returns often violates the IID assumptions. Therefore, it is important that splits respect temporal order to avoid **lookahead bias**. This can be achieved using sklearn's `TimeSeriesSplit` class which ensures that the test periods do not overlap and are located at the end of the period available in the data. After a test period is used, it becomes part of the training data that rolls forward and remains constant in size. Parameter tuning is done via `GridSearchCV` with performance metric `roc_auc` score.
+
+A typical train-test-split of 80/20 is done using `TimeSeriesSplit` on the data from 2017/07/14 to 2021/08/03. Logistic regression has only one hyperparameter, C which is set to [1.e-05, 1.e-04, 1.e-03, 1.e-02, 1.e-01, 1.e+00, 1.e+01, 1.e+02, 1.e+03, 1.e+04, 1.e+05]
+for gridsearch purpose. Hyperparameter tuning iterates under different lags of [1,3,5,7]. From below validation curves, it is evident that the AUC score is not sensitive to the change of hyperparameter C as both training and cross-validation curves are almost flat. All learning curve has a shaded confidence interval band around the cross-validaiton erro which indicates that the preidction errors are more driven by variance than by bias. The cross-validation performance continues to drop from a training size of 10,000 and eventually training and cross-validation scores tend to converge except for lag=1. It is unlikely that additional data will help improve performance. 
+
+
+![gridsearch.JPG](images/gridsearch.JPG)
+
 # AWS Infrastructure
 
 An AWS credit of 600 USD was used to build a scalable production environment where it is easy to deploy changes without having to worry too much about provisioning and managing hardware.
