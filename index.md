@@ -384,7 +384,7 @@ A typical train-test-split of 80/20 is done using `TimeSeriesSplit` on the data 
 for gridsearch purpose. Hyperparameter tuning iterates under different lags of [1,3,5,7]. From below validation curves, it is evident that the AUC score is not sensitive to the change of hyperparameter C as both training and cross-validation curves are almost flat. All learning curve has a shaded confidence interval band around the cross-validaiton erro which indicates that the preidction errors are more driven by variance than by bias. The cross-validation performance continues to drop from a training size of 10,000 and eventually training and cross-validation scores tend to converge except for lag=1. It is unlikely that additional data will help improve performance. 
 
 
-![gridsearch.JPG](images/gridsearch.JPG)
+![p4.png](images/p4.png)
 
 # AWS Infrastructure
 
