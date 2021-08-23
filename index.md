@@ -317,7 +317,7 @@ Statistical Arbitrage strategy uses mean reversion principle to take advantage o
 ## Cointegration
 To develop mathematical models that best describe the data, time series analysis is performed. Such analysis usually involves methods like ordinary least squares with a key assumption that the statistical properties of the time series such as variances and means are constant. Non-stationary time series (or unit root variables) fail to meet this assumption. Therefore, these time series need to be analyzed with a different method called **cointegration**. More formally, the series *X_t* and *Y_t* are cointegrated if there exists a linear combination of them which is *stationary* i.e:   
 
-![ff00.png](images/ff00.png) ,where $\epsilon_t$ is a *stationary* time series.
+![ff00.png](images/ff00.png) ,where *epsilon_t* is a *stationary* time series.
 
 ## Test for Cointegration
 Intuitively, some linear combination of the time series removes most of the auto-covarance and is mostly white noise, which is useful for pairs trading. Since the linear combination of prices of different assets is white noise, this relationship is expected to mean revert and trade can be executed accordingly.
@@ -325,18 +325,18 @@ Intuitively, some linear combination of the time series removes most of the auto
 In the case of pairs trading, the linear combination is expressed in terms of spread:
 
 ![ff02.png](images/ff02.png)
-,where a minus sign is inserted to express that one asset is long and another is short, so that $h$ defined is usually positive. If the spread is stationary, the currency pairs are cointegrated.
+,where a minus sign is inserted to express that one asset is long and another is short, so that *h* defined is usually positive. If the spread is stationary, the currency pairs are cointegrated.
 
 **Engle-Granger two-step method** is used to check whether the spread is stationary. It involves the following: 1) Regressing one series on another to estimate the stationary long-term relationship  2) Applying an **Augmented Dickey-Fuller (ADF)** unit-root test to the regression residual.This test is implemented in `statsmodels.tsa.stattools.coint`.
 
-Five coins are selected, which are Bitcoin(BTC/USDT), Ethereum(ETH/USDT), Cardano(ADA/USDT), Ripple(XRP/USDT) and Binance Coin(BNB/USDT). The Engle-Granger test suggests that 3 pairs are cointegrated for a threshold of $\alpha=0.05$. The below heatmap shows the p-values of the cointegration test between each pair of coins.
+Five coins are selected, which are Bitcoin(BTC/USDT), Ethereum(ETH/USDT), Cardano(ADA/USDT), Ripple(XRP/USDT) and Binance Coin(BNB/USDT). The Engle-Granger test suggests that 3 pairs are cointegrated for a threshold of *alpha=0.05*. The below heatmap shows the p-values of the cointegration test between each pair of coins.
 
 ![hm0.png](images/hm0.png)
 
 ## Trading Strategy with Spread
 In order to calculate the spread, a linear regression is implemented to get the beta coefficient. This coefficient can be interpreted as the hedge ratio to make the portfolio of the two coins stationary. In pair trading, one coin is long and simultaneously *hedge ratio* number of the other coin is short so that the linear combination of the two coins is stationary. As the cryptocurrency market is very volatile, it is more accurate to use rolling beta derived from Rolling Ordinary Least Square (RollingOLS) in order to estimate a hedge ratio that can vary with time.
 
-In the stock market, the price ratio of the prices $\frac{S_1}{S_2}$ is often used as a signal. The problem is that the ratio is not necessarily stationary or might not remain stationary throughout the period. And this is a problem encountered: as the price ratio instead of a dynamically changing hedge ratio is used, the two assets stopped being cointegrated after a while and observed some large losses in daily P&L calculation.
+In the stock market, the price ratio of the prices *S_1/S_2* is often used as a signal. The problem is that the ratio is not necessarily stationary or might not remain stationary throughout the period. And this is a problem encountered: as the price ratio instead of a dynamically changing hedge ratio is used, the two assets stopped being cointegrated after a while and observed some large losses in daily P&L calculation.
 
 The absolute spread is less helpful as the prices of coins can be very different in scale. Thus, the spread is normalized by transforming it to a z-score and use this z-score to derive our trading signal:
 
@@ -364,7 +364,7 @@ For example, when ETH/BTC increases in price, it attracts more attention from tr
 The above mentioned indicators such as MA, ATR and RSI are considered as alpha factors resulting from transforming raw market data using arithmetic and are effective features for the momentun strategy. However, in this section lagged returns, momentum, volatility and distance are used as features for logistic regression.
 
 ## Features
-- **Lagged returns**: In addition to calculating most recent ($t$ and $t-1$) return, more information about the strength of the cryptocurrency can be extracted from returns calculated using price data dated further back in time. For example, `lag = 3` creates three features with 1, 2, and 3 lookback period.  
+- **Lagged returns**: In addition to calculating most recent (*t* and *t-1*) return, more information about the strength of the cryptocurrency can be extracted from returns calculated using price data dated further back in time. For example, `lag = 3` creates three features with 1, 2, and 3 lookback period.  
 
 - **Momentum**: Momentum is defined as the rolling mean of returns using a pre-defined window that captures recent change in return.
 
@@ -373,7 +373,7 @@ The above mentioned indicators such as MA, ATR and RSI are considered as alpha f
 - **Distance**: Distance measures how far price has moved from its average value. It is the difference between price and its rolling mean.
 
 ## Signals
-Signals based on the most recent return are binarized outcomes: 1 if return is positive, 0 otherwise. More precisely the label $y$ is encoded as:
+Signals based on the most recent return are binarized outcomes: 1 if return is positive, 0 otherwise. More precisely the *y* label is encoded as:
 
 ![m_equation.png](images/m_equation.png)
 
