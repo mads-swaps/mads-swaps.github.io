@@ -36,7 +36,7 @@ In cryptocurrency, “trading pairs” or “cryptocurrency pairs” are assets 
 
 In the initial EDA, a notebook was created to automatically fetch and merge data from Binance into a Pandas Dataframe.  The notebook [binance_fetch_klines.ipynb](https://github.com/mads-swaps/swap-for-profit/blob/main/fetch_data/binance_fetch_klines.ipynb) along with basic configuration changes allows data from different trading pair symbols and candlestick periods to be downloaded.  With this data, initial feature engineering was performed along with target variable creation and the testing of some simple models.
 
-## Data Consistent
+## Data Content
 
 Below is an example of the data provided by the Binance API for a specific currency pair.
 
@@ -127,22 +127,22 @@ Included in the candlestick data from Binance are five features that relates to 
 
 # Strategies
 
-## Target and Stop Loss
+## Target and Stop-Loss
 
-In traditional forex trading, stop and limit orders are methods to protect an investor that can be used to buy and sell currencies when a price reaches a certain level.  Using this, a predictive model can focus only on buy opportunities and then rely on a simple strategy to determine when to sell. A sell strategy defines two sell prices for a given buy opportunity.  The first sell price is called the **target**, which is the high price that results in a profit and the next is the **stop loss**, which is the low resulting in a loss. When a buy opportunity is identified, and a target and stop loss is calculated, the purchase can be made and the sell will be automatic either by the exchange or by another system that monitors the market price.
+In traditional forex trading, stop and limit orders are methods to protect an investor that can be used to buy and sell currencies when a price reaches a certain level.  Using this, a predictive model can focus only on buy opportunities and then rely on a simple strategy to determine when to sell. A sell strategy defines two sell prices for a given buy opportunity.  The first sell price is called the **target**, which is the high price that results in a profit and the next is the **stop-loss**, which is the low resulting in a loss. When a buy opportunity is identified, and a target and stop-loss is calculated, the purchase can be made and the sell will be automatic either by the exchange or by another system that monitors the market price.
 
-In the example below, a buy opportunity is identified at the close of the 4:00am candlestick at a price of `0.060497` Bitcoin (`BTC`) per 1.0 Etherum (`ETH`).  Buying ETH at this price, a target and stop loss is calculated with a `1.0% : 0.5%` ratio, thus `0.061102` for a target and `0.060195` for a stop loss.  The price reaches the target price eight candlesticks later or 2 hours later at 6:00am, thus securing `1.0%` profit (assuming no fees).
+In the example below, a buy opportunity is identified at the close of the 4:00am candlestick at a price of `0.060497` Bitcoin (`BTC`) per 1.0 Etherum (`ETH`).  Buying ETH at this price, a target and stop-loss is calculated with a `1.0% : 0.5%` ratio, thus `0.061102` for a target and `0.060195` for a stop-loss.  The price reaches the target price eight candlesticks later or 2 hours later at 6:00am, thus securing `1.0%` profit (assuming no fees).
 
 <p align="center"><img src='images/target_profits.png' alt='images/target_profits.png'></p>
 <center><b>Figure X</b> - Example <code>ETH</code> buy opportunity.</center>
 
 ### Identifying Buying Opportunities
 
-Using a target and stop loss approach simplifies the model to a binary classification problem but a new problem is created, there is no labeled data to train on.  The goal here is to create a label for each record.  A record being the data for one candlestick.  This includes the low, high, open and close prices as well as some additional features such as volume and number of trades.  Using the close price for each record, a target and stop loss price is calculated using the same threshold ratio that will be used on the deployed model.  Using the example above, a ratio of `1.0% : 0.5%` returns a target price `1.0%` higher than the close price and a stop loss of `0.5%` below the close price.  The next step is to peek into the future and see what happens first. Does the price reach the target price first or the stop loss?  If it reaches the target, the record's label will be a `1` meaning "buy".  Another consideration is how far in the future it should look.  This is called the "window".  Typically, 15 candles in the future is used.  If the price reaches stop loss first or if price hovers between the target and stop loss within the window, the record will be a `0` meaning "not buy".
+Using a target and stop-loss approach simplifies the model to a binary classification problem but a new problem is created, there is no labeled data to train on.  The goal here is to create a label for each record.  A record being the data for one candlestick.  This includes the low, high, open and close prices as well as some additional features such as volume and number of trades.  Using the close price for each record, a target and stop-loss price is calculated using the same threshold ratio that will be used on the deployed model.  Using the example above, a ratio of `1.0% : 0.5%` returns a target price `1.0%` higher than the close price and a stop-loss of `0.5%` below the close price.  The next step is to peek into the future and see what happens first. Does the price reach the target price first or the stop-loss?  If it reaches the target, the record's label will be a `1` meaning "buy".  Another consideration is how far in the future it should look.  This is called the "window".  Typically, 15 candles in the future is used.  If the price reaches stop-loss first or if price hovers between the target and stop-loss within the window, the record will be a `0` meaning "not buy".
 
-A common question is why not make the stop loss as small as possible?  Setting the stop loss too small can result in being "wicked out" of a trade.  Looking at figure above, if the stoploss is made too small, the wick of the next candle after the buy could poke through resulting in the stop loss being breached before the target price, thus resulting in a "not buy".  Therefore, setting a higher stop loss gives some buffer for the price to fluctuate before a gain is achieved while minimizing losses.
+A common question is why not make the stop-loss as small as possible?  Setting the stop-loss too small can result in being "wicked out" of a trade.  Looking at figure above, if the stop-loss is made too small, the wick of the next candle after the buy could poke through resulting in the stop-loss being breached before the target price, thus resulting in a "not buy".  Therefore, setting a higher stop-loss gives some buffer for the price to fluctuate before a gain is achieved while minimizing losses.
 
-For the remainder of the target stop loss strategy discussion, the strategy will focus on `BTC` buy opportunities with the starting coin being `ETH`.  In other words, `ETH` will be used to buy `BTC` and will be sold back to `ETH` when the price reaches a target or stop loss price.  This can cause a bit of confusion because the price is the number of BTC within 1 ETH which means, a profit is made when the price actually drops thus the target will be lower than stop loss (opposite the figure above).  It is for this reason the `reverse` flag is set to `True` (see below).
+For the remainder of the target stop-loss strategy discussion, the strategy will focus on `BTC` buy opportunities with the starting coin being `ETH`.  In other words, `ETH` will be used to buy `BTC` and will be sold back to `ETH` when the price reaches a target or stop-loss price.  This can cause a bit of confusion because the price is the number of BTC within 1 ETH which means, a profit is made when the price actually drops thus the target will be lower than stop-loss (opposite the figure above).  It is for this reason the `reverse` flag is set to `True` (see below).
 
 ### Determining Ideal Ratios
 
@@ -153,7 +153,7 @@ Models generally perform better on balanced data so getting half of the labels t
 <p align="center"><img src='images/find_ratio.png' alt='images/find_ratio.png'></p>
 <center><b>Figure X</b> - Finding the best ratios to maximize label data using a window of <code>30</code> on ETHBTC 15-minute candles.</center>
 
-Unsurprisingly, as the ratio grows or ratio multiple grows, fewer buy opportunities can be found in the data because there are fewer windows where high profits can be achieved and fewer windows where smaller stop losses don't get wicked out by the volatility of the market.  None of the plots reaches the goal of `50%` but the results provide plenty of options to avoid sparsely labeled data.  From this analysis, the ATR Ratio is maximized at `2:1` with approximately `40%` of the labels being `1`.  The percentage ratio is maximized at `1.0% : 0.5%` with approximately `27%` of the labels being `1`.
+Unsurprisingly, as the ratio grows or ratio multiple grows, fewer buy opportunities can be found in the data because there are fewer windows where high profits can be achieved and fewer windows where smaller stop-losses don't get wicked out by the volatility of the market.  None of the plots reaches the goal of `50%` but the results provide plenty of options to avoid sparsely labeled data.  From this analysis, the ATR Ratio is maximized at `2:1` with approximately `40%` of the labels being `1`.  The percentage ratio is maximized at `1.0% : 0.5%` with approximately `27%` of the labels being `1`.
 
 ### Building Xy Datasets
 
@@ -191,7 +191,7 @@ In 2017, Binance started reporting figures and it took some time for these to de
 
 To get a sense of what an ideal profit would look like for each of the labelling strategies, it is necessary to run them through a simulator.  Why is this necessary?  Why can't this be calculated from the above figures?  To answer this, imagine having two candles, one after another, where the labeling has marked both as `1`.  In a deployed model, when a buy signal is received, all available currency will be spent.  When evaluating the next candlestick data, the model will be evaluating for selling, not buying, so that candlestick will not be evaluated for a buy opportunity.
 
-The simulator logic is the same logic as in the deployed model pipeline but instead of looking at the predictions, it looks at the validation labeled data which is already guaranteed to contain profitable trades assuming it uses the same ratio and other hyperparameters as the dataset's labelling strategy.  The simulator works, in short, by progressing through the labeled data, looking for the next buy opportunity, calculates the target and stop loss prices, finds the next record that surpasses one of these, calculating the profit/loss along with any fees, and then repeats the process until it reaches the end.  The last sell indicates the maximized profit achievable for the dataset.  The below table shows how each dataset's number of trades and maximized profit based on a starting value of `1 ETH` and a fee of `0.1%` for each buy or sell transaction using the validation data.
+The simulator logic is the same logic as in the deployed model pipeline but instead of looking at the predictions, it looks at the validation labeled data which is already guaranteed to contain profitable trades assuming it uses the same ratio and other hyperparameters as the dataset's labelling strategy.  The simulator works, in short, by progressing through the labeled data, looking for the next buy opportunity, calculates the target and stop-loss prices, finds the next record that surpasses one of these, calculating the profit/loss along with any fees, and then repeats the process until it reaches the end.  The last sell indicates the maximized profit achievable for the dataset.  The below table shows how each dataset's number of trades and maximized profit based on a starting value of `1 ETH` and a fee of `0.1%` for each buy or sell transaction using the validation data.
 
 |dataset|sim_num_trades|sim_max_profit|sim_bad_trades|
 |:-|-:|-:|-:|
@@ -455,7 +455,7 @@ Binance offers a Demo Exchange to test strategies using virtual capital.  By bui
 <dl>
     <dt>Nicholas Miller</dt>
     <dd>Feature engineering</dd>
-    <dd>Target and stoploss</dd>
+    <dd>Target and stop-loss</dd>
     <dd>Training and evaluation</dd>
     <dd>Final report</dd>
     <dt>Sophie Deng</dt>
