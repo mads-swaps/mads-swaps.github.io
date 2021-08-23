@@ -13,15 +13,15 @@ August 24, 2021
 
 # Background
 
-This post will introduce data scientists who are interested in cryptocurrency exchange models that can be used to predict buy and sell opportunities based on several strategies with in depth descriptions and access to code that is being used to simulate a variety of models with varying performance.
+This post will introduce data scientists who are interested in cryptocurrency exchange models that can be used to predict buy and sell opportunities based on several strategies with in-depth descriptions and access to code that is being used to simulate a variety of models with varying performance.
 
 ## What is Forex
 
-Forex is short for foreign currency exchange and is the trading of currencies with the goal making profits by timing the buy and sell of specific currency pairs while using candlestick charts. Strategies for trading are created by looking for patterns that can be used to predict future currency exchange price fluctuations.
+Forex is short for foreign currency exchange and is the trading of currencies with the goal of making profits by timing the buy and sell of specific currency pairs while using candlestick charts. Strategies for trading are created by looking for patterns that can be used to predict future currency exchange price fluctuations.
 
 ## Candlestick Charts
 
-A candlestick chart is the standard plot used in visualizing trading activity where a candle is represented by a box plot that visualizes 4 prices within a given period: the high, low, open and close price.  The box, or body of the candle, is colored based on if the open price is greater than the close and differently if vice versa.  In the below chart, a white candlestick means the close price is higher than the open price meaning the price is going up.  The lines coming out of the candlestick body are called "shadows" or "wicks" and represent the price spread for the given period by extending out to the high and low price.  An individual candlestick can represent a period as short as a second to days or weeks or more.  The chart below is a 15 minute candlestick chart so each candlestick represents a 15 minute period.
+A candlestick chart is the standard plot used in visualizing trading activity where a candle is represented by a box plot that visualizes 4 prices within a given period: the high, low, open, and close price.  The box, or body of the candle, is colored based on if the open price is greater than the close and differently if vice versa.  In the below chart, a white candlestick means the close price is higher than the open price meaning the price is going up.  The lines coming out of the candlestick body are called "shadows" or "wicks" and represent the price spread for the given period by extending out to the high and low prices.  An individual candlestick can represent a period as short as a second to days or weeks or more.  The chart below is a 15-minute candlestick chart so each candlestick represents a 15 minute period.
 
 <p align="center"><img src='images/15min_candle.png' alt='images/15min_candle.png'></p>
 <center><b>Figure X</b> - Here is an example 15-minute candlestick chart for the Ethereum/Bitcoin cryptocurrency exchange rate.<br>This visualization was rendered using the Python library <a href='https://github.com/matplotlib/mplfinance'><code>mplfinance</code></a>.</center>
@@ -36,9 +36,9 @@ In cryptocurrency, “trading pairs” or “cryptocurrency pairs” are assets 
 
 In the initial EDA, a notebook was created to automatically fetch and merge data from Binance into a Pandas Dataframe.  The notebook [binance_fetch_klines.ipynb](https://github.com/mads-swaps/swap-for-profit/blob/main/fetch_data/binance_fetch_klines.ipynb) along with basic configuration changes allows data from different trading pair symbols and candlestick periods to be downloaded.  With this data, initial feature engineering was performed along with target variable creation and the testing of some simple models.
 
-## Data consistent
+## Data Consistent
 
-Below is an example of the data provide by the Binance API for a specific currency pair.
+Below is an example of the data provided by the Binance API for a specific currency pair.
 
 |Open Time|Open Price|High Price|Low Price|Close Price|Volume|Close Time|Quote Asset Volume|Number of Trades|Taker Buy Base Asset Volume|Taker Buy Quote Asset Volume|
 |:-|-:|-:|-:|-:|-:|:-|-:|-:|-:|-:|
@@ -50,7 +50,7 @@ Below is an example of the data provide by the Binance API for a specific curren
 
 # Feature Engineering
 
-To expand on the data provided by Binanace, additional features allows models to use a single candlestick's record to have access to context necessary for models to learn.
+To expand on the data provided by Binance, additional features allow models to use a single candlestick's record to have access to the context necessary for models to learn.
 
 ## Lookbacks
 
@@ -68,7 +68,7 @@ Indicators are non-Boolean numerical features that are calculated based on a win
 
 ### Moving Averages (MA)
 
-Moving averages are common indicators used in forex and can give insight into price trend or momentum by smoothing out the variations.  A moving average operates on a window which represents the average over a given number of records.  A typical value of `14` is used in forex and for this work three are used: `14`, `30` and `90`.
+Moving averages are common indicators used in forex and can give insight into price trends or momentum by smoothing out the variations.  A moving average operates on a window that represents the average over a given number of records.  A typical value of `14` is used in forex and for this work three are used: `14`, `30`, and `90`.
 
 The equation for moving average is the following where *k* is the window size on a dataset containing *N* items:
 
@@ -76,19 +76,19 @@ The equation for moving average is the following where *k* is the window size on
 
 ### Average True Range (ATR)
 
-The ATR is an indicator of volatility in the market.  A higher ATR and the price is more likely to jump around which can result in higher gains but at higher risk.  It is calculated by looking at the true range (TR) of the current record and then averaging out over a window typically of size `14`.  This is also useful determining target and stop loss prices which will be discussed in the different strategies.
+The ATR is an indicator of volatility in the market.  A higher ATR and the price is more likely to jump around which can result in higher gains but at higher risk.  It is calculated by looking at the true range (TR) of the current record and then averaging out over a window typically of size `14`.  This is also useful in determining the target and stop-loss prices which will be discussed in the different strategies.
 
 <p align="center"><img src='images/eq_atr.png' alt='images/eq_atr.png'></p>
 
 ### Relative Strength Index (RSI)
 
-The RSI is a momentum indicator that measures the magnitude of recent price changes.  The value is limited between `0` and `100`.  Traditionally, if the RSI value is above `70`, it is considered "overvalued" and the price may soon reverse.  A value below `30` is thus considered "undervalued".  The calculation for this is more complicated.  First the relative strength is found by comparing the exponential moving averages of the positive differences in closing price divided by the exponential moving averages of the negative differences in the closing price.  Then the value is normalized into an index between `0` and `100`.
+The RSI is a momentum indicator that measures the magnitude of recent price changes.  The value is limited between `0` and `100`.  Traditionally, if the RSI value is above `70`, it is considered "overvalued" and the price may soon reverse.  A value below `30` is thus considered "undervalued".  The calculation for this is more complicated.  First, the relative strength is found by comparing the exponential moving averages of the positive differences in closing price divided by the exponential moving averages of the negative differences in the closing price.  Then the value is normalized into an index between `0` and `100`.
 
 <p align="center"><img src='images/eq_rsi.png' alt='images/eq_rsi.png'></p>
 
 ### Support and Resistance Lines
 
-Support and resistance are levels that act as barriers that prevent a price from either dropping below (support) or raising above (resistance) an expected price.  The levels can be horizontal or they can represent a trendline.  While there is no agreed formula, this feature dataset will use the `min` and `max`  in a given window.  Again, three windows will be used resulting in three features `14`, `30` and `90`.
+Support and resistance are levels that act as barriers that prevent a price from either dropping below (support) or raising above (resistance) an expected price.  The levels can be horizontal or they can represent a trendline.  While there is no agreed formula, this feature dataset will use the `min` and `max`  in a given window.  Again, three windows will be used resulting in three features `14`, `30`, and `90`.
 
 <p align="center"><img src='images/eq_sr.png' alt='images/eq_sr.png'></p>
 
@@ -119,11 +119,11 @@ There are numerous candlestick patterns and each pattern tells a story of how th
 
 ### Date and Time
 
-It's possible that certain days-of-the-week (DOW) or time-of-the-day (TOD) impact trading trends.  For this reason, DOW and TOD are added as features in a numerical format based on the candlestick's open time.  The DOW is represented by a number between `0` and `6` and the TOD is normalized between `0` and `1`.
+Certain days-of-the-week (DOW) or time-of-the-day (TOD) may impact trading trends.  For this reason, DOW and TOD are added as features in a numerical format based on the candlestick's open time.  The DOW is represented by a number between `0` and `6` and the TOD is normalized between `0` and `1`.
 
 ### Trading Volume
 
-Within the candlestick data that is coming from Binance there are five features that relate to trading volume.  This data is included, unaltered, as available features.  They include `number_of_trades`, `volume`, `quote_asset_volume`, `taker_buy_base_asset_volume`, and `taker_buy_quote_asset_volume`.
+Included in the candlestick data from Binance are five features that relates to the trading volume.  These are included, unaltered, as available features.  They include `number_of_trades`, `volume`, `quote_asset_volume`, `taker_buy_base_asset_volume`, and `taker_buy_quote_asset_volume`.
 
 # Strategies
 
