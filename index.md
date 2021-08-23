@@ -346,7 +346,7 @@ The absolute spread is less helpful as the prices of coins can be very different
 
 Let's focus on the cointegrated pair (ETH/USDT, ADA/USDT) and visualize the price series, rolling beta, z-score, and the performance of the strategy against the benchmark (buy and hold). As explained above, we use statistics based on rolling windows to incorporate more recent data - a short window of one hour to smooth out the current spread information, a long window of 12 hours as a measure of the rolling mean as well as a 12 hours rolling standard deviation. The strategy outperforms buy and hold individual coins excluding costs.
 
-![pairtrading1.JPG](images/pairtrading1.JPG)
+![p1.png](images/p1.png)
 ![pairtrading2.JPG](images/pairtrading2.JPG)
 
 ## Risks of Statistical Arbitrage
