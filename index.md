@@ -322,7 +322,7 @@ Intuitively, some linear combination of the time series removes most of the auto
 
 In the case of pair trading we are interested in, we express the linear combination in terms of spread:
 
-![f1.png](images/f1.png)
+![output-onlinepngtools.png](images/output-onlinepngtools.png)
 where we inserted a minus sign to express that we will be long one asset and short another, so that $h$ defined is usually positive. If the spread is stationary, we can say that the currency pairs are cointegrated.
 
 We use **Engle-Granger two-step method** to check whether the spread is stationary. It involves the following: 1) Regressing one series on another to estimate the stationary long-term relationship  2) Applying an **Augmented Dickey-Fuller (ADF)** unit-root test to the regression residual.This test is implemented in `statsmodels.tsa.stattools.coint`.
@@ -494,7 +494,7 @@ Binance offers a Demo Exchange to test strategies using virtual capital.  By bui
     <dd>Final report</dd>
     <dt>Sophie Deng</dt>
     <dd>Statistical arbitrage</dd>
-    <dd>Zipline momenetum modeling</dd>
+    <dd>momenetum modeling</dd>
     <dd>Training and evaluation</dd>
     <dd>Final report</dd>
     <dt>Tim Chen</dt>
