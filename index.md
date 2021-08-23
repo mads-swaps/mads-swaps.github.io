@@ -17,7 +17,7 @@ This post will introduce data scientists who are interested in cryptocurrency ex
 
 ## What is Forex
 
-Forex is short for foreign currency exchange and is the trading of currencies with the goal making profits by timing the buy and sell of specific currency pairs while using candlestick charts. Strategies for trading are created by looking for patterns that can be used to predict future currency exchange price fluctuations.  
+Forex is short for foreign currency exchange and is the trading of currencies with the goal making profits by timing the buy and sell of specific currency pairs while using candlestick charts. Strategies for trading are created by looking for patterns that can be used to predict future currency exchange price fluctuations.
 
 ## Candlestick Charts
 
@@ -30,13 +30,26 @@ A candlestick chart is the standard plot used in visualizing trading activity wh
 
 ## Data Source
 
-In cryptocurrency, “trading pairs” or “cryptocurrency pairs” are assets that can be traded for each other on an exchange.  In this project, candlestick data provided by Binance was used.   The decision to use 15 minute candlestick data was made to strike a balance between having a practical dataset size to work with and a frequency which isn’t too sparse or too overwhelming.  There are actually two ways to obtain the candlestick data from Binance, one is through the Binance Data Listing at https://data.binance.vision/, another is through its API defined at:https://github.com/binance/binance-public-data/.
+In cryptocurrency, “trading pairs” or “cryptocurrency pairs” are assets that can be traded with each other on an exchange.  In this post, candlestick data provided by Binance was used.   The decision to use 15-minute candlestick data was made to strike a balance between having a practical dataset size to work with and a frequency which isn’t too sparse or too overwhelming.  There are actually two ways to obtain the candlestick data from Binance, one is through the [Binance Data Listing](https://data.binance.vision/), another is through its [API](https://github.com/binance/binance-public-data/).
 
 ## Manual Data Acquisition
 
-For the initial EDA process, a notebook was created to automatically fetch and merge data from Binance into a Dataframe.  The notebook is available at [https://github.com/mads-swaps/swap-for-profit/blob/main/fetch_data/binance_fetch_klines.ipynb](https://github.com/mads-swaps/swap-for-profit/blob/main/fetch_data/binance_fetch_klines.ipynb), and simple configuration changes allows data from different trading pair symbols and candlestick periods to be easily downloaded.  With this data, we were able to perform initial feature engineering, target variable creation and test out some simple models.
+In the initial EDA, a notebook was created to automatically fetch and merge data from Binance into a Pandas Dataframe.  The notebook [binance_fetch_klines.ipynb](https://github.com/mads-swaps/swap-for-profit/blob/main/fetch_data/binance_fetch_klines.ipynb) along with basic configuration changes allows data from different trading pair symbols and candlestick periods to be downloaded.  With this data, initial feature engineering was performed along with target variable creation and the testing of some simple models.
+
+## Data consistent
+
+Below is an example of the data provide by the Binance API for a specific currency pair.
+
+|Open Time|Open Price|High Price|Low Price|Close Price|Volume|Close Time|Quote Asset Volume|Number of Trades|Taker Buy Base Asset Volume|Taker Buy Quote Asset Volume|
+|2017-07-14 04:00:00+00:00|12.500000|12.500000|11.574074|11.574074|0.728274|2017-07-14 04:14:59.999|8.752|26|0.282355|3.268|
+|2017-07-14 04:15:00+00:00|11.724841|11.747016|11.627907|11.653518|5.217079|2017-07-14 04:29:59.999|61.042|33|0.235027|2.738|
+|2017-07-14 04:30:00+00:00|11.653518|11.653518|11.576754|11.585606|4.631740|2017-07-14 04:44:59.999|53.769|41|1.829643|21.225|
+|2017-07-14 04:45:00+00:00|11.585606|11.586277|11.576754|11.581178|3.697253|2017-07-14 04:59:59.999|42.818|61|0.686295|7.948|
+|2017-07-14 05:00:00+00:00|11.644968|11.819213|11.600255|11.809164|1.404228|2017-07-14 05:14:59.999|16.520|15|0.100914|1.176|
 
 # Feature Engineering
+
+To expand on the data provided by Binanace, additional features allows models to use a single candlestick's record to have access to context necessary for models to learn.
 
 ## Lookbacks
 
@@ -259,7 +272,7 @@ Using this scaling algorithm, each record is individually scaled independent of 
 
 ### Ensemble with Custom Scaling
 
-Using the scaler discussed previously, a new ensemble of logistic regression models can be produced with the goal of having a model that be able to perform on both `ETHBTC` and `BTCETH` trading.  Again, a threshold and ratio are brute forced.  In the below figure, profit is maximized at threshold of `0.10` with a value of `1.35` again surpassing any individual model simulation performance.  This time, the profit is maximized with a ratio of `4:2` in contrast with the highest precision dataset being `2:1`. 
+Using the scaler discussed previously, a new ensemble of logistic regression models can be produced with the goal of having a model that be able to perform on both `ETHBTC` and `BTCETH` trading.  Again, a threshold and ratio are brute forced.  In the below figure, profit is maximized at threshold of `0.10` with a value of `1.35` again surpassing any individual model simulation performance.  This time, the profit is maximized with a ratio of `4:2` in contrast with the highest precision dataset being `2:1`.
 
 <p align="center"><img src='images/scaled_ensemble_find_t.png' alt='images/scaled_ensemble_find_t.png'></p>
 <center><b>Figure X</b> - Simulated precision, recall and profit for varying thresholds on a scaled Logistic Regression ensemble.</center>
@@ -295,7 +308,7 @@ The general trend that is consistent across all models is that the training loss
 
 # Statistical Arbitrage
 ## What is Statistical Arbitrage
-Statistical Arbitrage, also known as stat arb, refers to trading strategies that uses statistical techniques to profit from patterns between financial instruments. Gerry Bamberger developed the first arbitrage strategy using pairs trading at Morgan Stanley in the 1980s. There are multiple types of Statistical Arbitrage. Market Neutral Arbitrage, Cross Asset Arbitrage and Cross Market Arbitrage are most commonly used. Since we are focusing on cryptocurrency spot market and the product type is similar to vanilla FX without other underlyings, Market Neutral Arbitrage is the natural choice for building a portfolio with multiple bitcoin pairs. As its name suggests, the returns of Market Neutral Arbitrage strategy are not affected by the market's price movment. Hence, it is market-netural with a beta of zero. 
+Statistical Arbitrage, also known as stat arb, refers to trading strategies that uses statistical techniques to profit from patterns between financial instruments. Gerry Bamberger developed the first arbitrage strategy using pairs trading at Morgan Stanley in the 1980s. There are multiple types of Statistical Arbitrage. Market Neutral Arbitrage, Cross Asset Arbitrage and Cross Market Arbitrage are most commonly used. Since we are focusing on cryptocurrency spot market and the product type is similar to vanilla FX without other underlyings, Market Neutral Arbitrage is the natural choice for building a portfolio with multiple bitcoin pairs. As its name suggests, the returns of Market Neutral Arbitrage strategy are not affected by the market's price movment. Hence, it is market-netural with a beta of zero.
 
 ## Mean Reversion Strategy and Pairs Trading
 Statistical Arbitrage strategy uses mean reversion principle to take advantage of the price inefficiencies between a group of securities. For instance, if you have a pair of instruments that share similar fundamentals and belong to the same sectors, even though in the short term the price may fluctuate, it is expected that these instruments behave similarly and the ratio or spread of such instruments to remain constant. Based on the mean reversion principle, if one instrument outperforms the other, it is temporary and will converge to the normal level in time. You can execute pairs trading to buy the underperforming instrument and sell the outperforming instrument.
@@ -308,7 +321,7 @@ Intuitively, some linear combination of the time series removes most of auto-cov
 
 In the case of pair trading we are interested in, we express the linear combination in terms of spread:
 ![formula22.JPG](images/formula22.JPG)
-where we inserted a minus sign to express that we will be long one asset and short another, so that $h$ defined is usually positive. If the spread is stationary, we can say that the currency pairs are cointegrated. 
+where we inserted a minus sign to express that we will be long one asset and short another, so that $h$ defined is usually positive. If the spread is stationary, we can say that the currency pairs are cointegrated.
 
 We use **Engle-Granger two-step method** to check whether the spread is stationary. It invovles the following: 1) Regressing one series on another to estimate the stationary long-tern relationship  2) Applying an **Augmented Dickey-Fuller (ADF)** unit-root test to the regression residual.This test is implemented in `statsmodels.tsa.stattools.coint`.
 
@@ -317,17 +330,17 @@ We choose five coins which are Bitcoin(BTC/USDT), Ethereum(ETH/USDT), Cardano(AD
 ![testheatmap.JPG](images/testheatmap.JPG)
 
 ## Trading Strategy with spread
-In order to calculate the spread, we use a linear regression to get the beta coefficient. This coefficient can be interpreted as the hedge ratio to make the portfolio of the two coins stationary. In pair trading, we long one coin and simulataneously short *hedge ratio* number of the other coin so that the linear combination of the two coins is stationary. As cryptocurrency market is very volatile, it is more accurate to use rolling beta derived from Rolling Ordinary Least Square (RollingOLS) in order to estimate a hedge ratio that can vary with time. 
+In order to calculate the spread, we use a linear regression to get the beta coefficient. This coefficient can be interpreted as the hedge ratio to make the portfolio of the two coins stationary. In pair trading, we long one coin and simulataneously short *hedge ratio* number of the other coin so that the linear combination of the two coins is stationary. As cryptocurrency market is very volatile, it is more accurate to use rolling beta derived from Rolling Ordinary Least Square (RollingOLS) in order to estimate a hedge ratio that can vary with time.
 
 In the stock market, the price ratio of the prices $\frac{S_1}{S_2}$ is often used as a signal. The problem is that the ratio is not necessarily stationary or might not remain stationary throughout the period. And this is a problem we encountered: as we used the price ratio instead of a dynamically chnaging hedge ratio, the two assets stopped being cointegrated after a while and observed some large losses in our daily P&L calculation.
 
 The absolute spread is less helpful as the prices of coins can be very different in scale. Thus, we normalize the spread by transforming it to a z-score and use this z-score to derive our trading signal:
 
-1. We enter a long (resp. short) position if the spread is below (resp. above) one, which means that the spread has moved one standard deviation below (resp. above) its moving average.  
+1. We enter a long (resp. short) position if the spread is below (resp. above) one, which means that the spread has moved one standard deviation below (resp. above) its moving average.
 
-2. We exit trades when the spread changes sign which signals a mean reversion. 
+2. We exit trades when the spread changes sign which signals a mean reversion.
 
-Let's focus on the cointegrated pair (ETH/USDT, ADA/USDT) and visualize the price series, rolling beta, z-score and the performance of the strategy against the benchmark (buy and hold). As explained above, we use statistics based on rolling windows to incorporate more recent data - a short window of one hour to smooth-out the current spread information, a long window of 12 hours as a measure of the rolling mean as well as a 12 hours rolling standard deviation. The strategy outperforms buy and hold individual coins excluding costs. 
+Let's focus on the cointegrated pair (ETH/USDT, ADA/USDT) and visualize the price series, rolling beta, z-score and the performance of the strategy against the benchmark (buy and hold). As explained above, we use statistics based on rolling windows to incorporate more recent data - a short window of one hour to smooth-out the current spread information, a long window of 12 hours as a measure of the rolling mean as well as a 12 hours rolling standard deviation. The strategy outperforms buy and hold individual coins excluding costs.
 
 ![pairtrading1.JPG](images/pairtrading1.JPG)
 ![pairtrading2.JPG](images/pairtrading2.JPG)
@@ -339,14 +352,14 @@ Statistical arbitrage models contain both *systemic* and *idiosyncratic* risks. 
 
 # AWS Infrastructure
 
-The team was provided with 600 USD worth of AWS credits for this project and a decision was made to create a scalable production environment where it is easy to deploy changes without having to worry too much about provisioning and managing hardware.
+An AWS credit of 600 USD was used to build a scalable production environment where it is easy to deploy changes without having to worry too much about provisioning and managing hardware.
 
 <p align="center"><img src='images/simple_diagram.png' alt='Simplified diagram of AWS services used for data acquisition and simulation'></p>
 <center><b>Figure X</b> - Simplified diagram of AWS services used for data acquisition and simulation.</center>
 
 ## Amazon Relational Database Service
 
-Amazon RDS is a managed database service on AWS.  The PostgreSQL engine was chosen for this project due to each of the team members having experience with it.  Although the performance was not the best, an instance size of t2.micro was sufficient with the current dataset size and loading based on simulation usage.
+Amazon RDS with a PostgreSQL engine was selected for its familiarity and expandability.  A low performance instance of size t2.micro is sufficient with the current dataset size and loading based on simulation usage despite being the second smallest t2 instance.
 
 The RDS database consists of 7 tables:
 
@@ -363,29 +376,31 @@ The RDS database consists of 7 tables:
 <p align="center"><img src='images/rds.png' alt='ER Diagram of the Database'></p>
 <center><b>Figure X</b> - ER Diagram of the Database.</center>
 
-The SQL files to recreate the database is available at [https://github.com/mads-swaps/swap-for-profit/tree/main/aws/rds](https://github.com/mads-swaps/swap-for-profit/tree/main/aws/rds).
+The SQL files to recreate the database are available [here](https://github.com/mads-swaps/swap-for-profit/tree/main/aws/rds).
 
 ## AWS Lambda and the Serverless Application Model
 
-AWS Lambda is a managed serverless compute service.  Lambda was chosen over Elastic Compute Cloud (EC2) because of the nature of the data and simulation, where the majority of the computations are performed at regular intervals with long idling periods in between.  As opposed to EC2, Lambda excels at automatic scaling and its pricing scheme matches perfectly with the spiky computational load.  With the Lambda setup, hundreds of simulations can be done in seconds while it takes up to minutes to do the same with EC2.
+AWS Lambda, a managed serverless service, was selected as the primary compute resource to handle the cloud computing that keeps the database up-to-date and the simulations running.  Lambda was selected instead of Elastic Compute Cloud (EC2) because of the nature of the data and simulation, where the majority of the computations are performed at regular intervals with long idling periods in between.  As opposed to EC2, Lambda excels at automatic scaling and its pricing scheme matches with spikes in computational load.  With the Lambda setup, hundreds of simulations can be done in seconds while it takes up to minutes to do the same with a similary specified EC2 resource.
 
-To deploy the Lambda functions, the AWS Serverless Application Model (SAM) framework was used.  The SAM framework automatically manages AWS infrastructures through configuration files.  Once configured, Lambda functions and its settings, security, and network configurations can be updated and deployed automatically through a few commands.  For this project, the Lambda functions are packaged as container images and uploaded to the Amazon Elastic Container Registry, allowing for easy rollback to previous versions if necessary.
+To deploy the Lambda functions, the AWS Serverless Application Model (SAM) framework is used.  The SAM framework automatically manages AWS infrastructures through configuration files.  Once configured, Lambda functions and its settings, security, and network configurations can be updated and deployed automatically.  The Lambda functions are packaged as container images and uploaded to the Amazon Elastic Container Registry, allowing for version co                                                                      ntrol.
 
 ## Amazon Simple Storage Service, Elastic File System, and DataSync
 
-Amazon S3 and EFS are both managed storage service on AWS.  The main difference is that S3 is an object store while EFS is a file system for compute services.  Both storage services are used as they provide different benefits in the workflow.
+To store the model assets on AWS, Amazon S3 and EFS managed storage service are used.  The main difference between S3 and EFS is that S3 is an object store while EFS is a file system for compute services.  Both storage services are used as they provide different benefits in the workflow.
 
 |  | S3 | EFS |
 | --- | --- | --- |
-| Versioning | Yes | No |
-| File management | Anytime directly through AWS console or GUI and CLI clients | Must be mounted by a compute service such as EC2 with remote file transfer service to make changes |
-| File system access | Objects must be copied to local file system before use | Can be accessed directly once mounted |
+| Version Control | Yes | No |
+| File Management | Anytime directly through AWS console or GUI and CLI clients | Must be mounted by a compute service such as EC2 with remote file transfer service to make changes |
+| File System Access | Objects must be copied to local file system before use | Can be accessed directly once mounted |
 
-As such, S3 is much simpler for the team to make changes to model assets such as pre-trained classifier, neural networks, and scalers.  On the other hand, EFS works more efficiently with the Lambda functions by not needing to copy assets everytime the function has a cold start.  To combine the convenience of S3 and efficiency of EFS, a synchronizing task was created using Amazon DataSync to copy the S3 files to the EFS drive.  Although not configured as such, it is possible to set the task to automatically execute everytime objects in the S3 buckets were updated, making it a fully automated process.
+S3 provides a simplier interface for uploading model assets such as pre-trained classifiers, neural networks, and scalers since a compute resource isn't necessary.  EFS, on the other hand, works more efficiently with the Lambda functions by not needing to copy assets everytime the function has a cold start.  To combine the convenience of S3 and efficiency of EFS, a synchronizing task is used called Amazon DataSync to copy the S3 files to the EFS drive by manually triggering the event each time new assets are uploaded to S3.  Although not configured as such, it is possible to set the task to automatically execute everytime objects in the S3 buckets were updated, making it a fully automated process.
 
 ## Amazon Simple Queue Service
 
-The Simple Queue Service (SQS) is a managed message queuing service on AWS.  It can be used to send and receive message within distributed systems, and, in this case, serverless applications.  SQS was chosen for how easy it is to set a queue up as well as its trigger integration with Lambda functions.  In this project, a single queue was used to a trigger the simulation Lambda function.  When a completed candlestick data for a particular cryptocurrency pair is received, the Binance Crawler Lambda enqueues the corresponding simulations to the queue.
+AWS Lambda functions need to be triggered by an event so AWS's Simple Queue Service (SQS) is used was configured to fulfill this necessary task.  A single queue was used to trigger the simulation Lambda function.  When a completed candlestick data for a particular cryptocurrency pair is received, the Binance Crawler Lambda enqueues the corresponding simulations to the queue.
+
+ to  is a managed message queuing service on AWS.  It can be used to send and receive message within distributed systems, and, in this case, serverless applications.  SQS was chosen for how easy it is to set a queue up as well as its trigger integration with Lambda functions.  In this project, a single queue was used to a trigger the simulation Lambda function.  When a completed candlestick data for a particular cryptocurrency pair is received, the Binance Crawler Lambda enqueues the corresponding simulations to the queue.
 
 ## Detailed Flow Diagram
 
