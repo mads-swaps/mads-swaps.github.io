@@ -321,7 +321,8 @@ To develop mathematical models that best describe the data, we perform time seri
 Intuitively, some linear combination of the time series removes most of the auto-covarance and is mostly white noise, which is useful for pairs trading. Since the linear combination of prices of different assets is white noise, we can bet on this relationship to mean revert and trade accordingly.
 
 In the case of pair trading we are interested in, we express the linear combination in terms of spread:
-![formula22.JPG](images/formula22.JPG)
+
+![f1.png](images/f1.png)
 where we inserted a minus sign to express that we will be long one asset and short another, so that $h$ defined is usually positive. If the spread is stationary, we can say that the currency pairs are cointegrated.
 
 We use **Engle-Granger two-step method** to check whether the spread is stationary. It involves the following: 1) Regressing one series on another to estimate the stationary long-term relationship  2) Applying an **Augmented Dickey-Fuller (ADF)** unit-root test to the regression residual.This test is implemented in `statsmodels.tsa.stattools.coint`.
