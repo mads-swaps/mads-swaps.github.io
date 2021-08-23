@@ -475,6 +475,19 @@ Amazon CloudWatch is AWS's monitoring service.  Logs from various services are s
 <center><b>Figure X</b> - Amazon CloudWatch monitoring dashboard showing system under regular load and usage.</center>
 
 # Evaluation
+Below table illustrates the evaluation metrics for visualizing the performance of a strategy.
+
+|Evaluation Metrics|Descriptions|
+|:-|:-|
+|Equity Curve|Total value of a portfolio over time|
+|Cumulative Returns|Accumulative percentage change of a portfolio value|
+|Drawdowns|A peak-to-trough decline during a specific period.It is an important measure of downside volatility|
+|Rolling Volatility|Standard deviation of price from its mean, using a rolling winow|
+|Rolling Sharpe Ratio|Reward-to-risk ratio.The ratio of the expectation of the excess returns of the strategy to the standard deviation of excess returns using a rolling window.|
+
+A function that accepts end of the day portfolio value (close price * quantity) and close price is written to automate portfolio evaluation process. It produces five graphs as per below.
+
+![perfeval.png](images/perfeval.png)
 
 # Next Steps
 
