@@ -331,7 +331,7 @@ We use **Engle-Granger two-step method** to check whether the spread is stationa
 
 We choose five coins which are Bitcoin(BTC/USDT), Ethereum(ETH/USDT), Cardano(ADA/USDT), Ripple(XRP/USDT) and Binance Coin(BNB/USDT). The Engle-Granger test suggests that 3 pairs are cointegrated for a threshold of $\alpha=0.05$. The below heatmap shows the p-values of the cointegration test between each pair of coins.
 
-![testheatmap.JPG](images/testheatmap.JPG)
+![hm0.png](images/hm0.png)
 
 ## Trading Strategy with Spread
 In order to calculate the spread, we use a linear regression to get the beta coefficient. This coefficient can be interpreted as the hedge ratio to make the portfolio of the two coins stationary. In pair trading, we long one coin and simultaneously short *hedge ratio* number of the other coin so that the linear combination of the two coins is stationary. As the cryptocurrency market is very volatile, it is more accurate to use rolling beta derived from Rolling Ordinary Least Square (RollingOLS) in order to estimate a hedge ratio that can vary with time.
