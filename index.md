@@ -131,16 +131,16 @@ Included in the candlestick data from Binance are five features that relates to 
 
 In traditional forex trading, stop and limit orders are methods to protect an investor that can be used to buy and sell currencies when a price reaches a certain level.  Using this, a predictive model can focus only on buy opportunities and then rely on a simple strategy to determine when to sell. A sell strategy defines two sell prices for a given buy opportunity.  The first sell price is called the **target**, which is the high price that results in a profit and the next is the **stop-loss**, which is the low resulting in a loss. When a buy opportunity is identified, and a target and stop-loss is calculated, the purchase can be made and the sell will be automatic either by the exchange or by another system that monitors the market price.
 
-In the example below, a buy opportunity is identified at the close of the 4:00am candlestick at a price of `0.060497` Bitcoin (`BTC`) per 1.0 Etherum (`ETH`).  Buying ETH at this price, a target and stop-loss is calculated with a `1.0% : 0.5%` ratio, thus `0.061102` for a target and `0.060195` for a stop-loss.  The price reaches the target price eight candlesticks later or 2 hours later at 6:00am, thus securing `1.0%` profit (assuming no fees).
+In the example below, a buy opportunity is identified at the close of the 4:00am candlestick at a price of `0.060497` Bitcoin (`BTC`) per 1.0 Etherum (`ETH`).  Buying ETH at this price, a target and stop-loss is calculated with a `1.0% : 0.5%` ratio, thus `0.061102` for a target and `0.060195` for a stop-loss.  The price reaches the target price eight candlesticks later or 2 hours later at 6:00 am, thus securing `1.0%` profit (assuming no fees).
 
 <p align="center"><img src='images/target_profits.png' alt='images/target_profits.png'></p>
 <center><b>Figure X</b> - Example <code>ETH</code> buy opportunity.</center>
 
 ### Identifying Buying Opportunities
 
-Using a target and stop-loss approach simplifies the model to a binary classification problem but a new problem is created, there is no labeled data to train on.  The goal here is to create a label for each record.  A record being the data for one candlestick.  This includes the low, high, open and close prices as well as some additional features such as volume and number of trades.  Using the close price for each record, a target and stop-loss price is calculated using the same threshold ratio that will be used on the deployed model.  Using the example above, a ratio of `1.0% : 0.5%` returns a target price `1.0%` higher than the close price and a stop-loss of `0.5%` below the close price.  The next step is to peek into the future and see what happens first. Does the price reach the target price first or the stop-loss?  If it reaches the target, the record's label will be a `1` meaning "buy".  Another consideration is how far in the future it should look.  This is called the "window".  Typically, 15 candles in the future is used.  If the price reaches stop-loss first or if price hovers between the target and stop-loss within the window, the record will be a `0` meaning "not buy".
+Using a target and stop-loss approach simplifies the model to a binary classification problem but a new problem is created, there is no labeled data to train on.  The goal here is to create a label for each record.  A record being the data for one candlestick.  This includes the low, high, open, and close prices as well as some additional features such as volume and number of trades.  Using the close price for each record, a target and stop-loss price is calculated using the same threshold ratio that will be used on the deployed model.  Using the example above, a ratio of `1.0% : 0.5%` returns a target price `1.0%` higher than the close price and a stop-loss of `0.5%` below the close price.  The next step is to peek into the future and see what happens first. Does the price reach the target price first or the stop-loss?  If it reaches the target, the record's label will be a `1` meaning "buy".  Another consideration is how far in the future it should look.  This is called the "window".  Typically, 15 future candles are used.  If the price reaches stop-loss first or if the price hovers between the target and stop-loss within the window, the record will be a `0` meaning "not buy".
 
-A common question is why not make the stop-loss as small as possible?  Setting the stop-loss too small can result in being "wicked out" of a trade.  Looking at figure above, if the stop-loss is made too small, the wick of the next candle after the buy could poke through resulting in the stop-loss being breached before the target price, thus resulting in a "not buy".  Therefore, setting a higher stop-loss gives some buffer for the price to fluctuate before a gain is achieved while minimizing losses.
+A common question is why not make the stop-loss as small as possible?  Setting the stop-loss too small can result in being "wicked out" of a trade.  Looking at the figure above, if the stop-loss is made too small, the wick of the next candle after the buy could poke through resulting in the stop-loss being breached before the target price, thus resulting in a "not buy".  Therefore, setting a higher stop-loss gives some buffer for the price to fluctuate before a gain is achieved while minimizing losses.
 
 For the remainder of the target stop-loss strategy discussion, the strategy will focus on `BTC` buy opportunities with the starting coin being `ETH`.  In other words, `ETH` will be used to buy `BTC` and will be sold back to `ETH` when the price reaches a target or stop-loss price.  This can cause a bit of confusion because the price is the number of BTC within 1 ETH which means, a profit is made when the price actually drops thus the target will be lower than stop-loss (opposite the figure above).  It is for this reason the `reverse` flag is set to `True` (see below).
 
@@ -148,7 +148,7 @@ For the remainder of the target stop-loss strategy discussion, the strategy will
 
 In the example above, a `1.0% : 0.5%` ratio is used but is this a good ratio to use?  Setting a ratio of `10% : 5%` might be too high because it would be unlikely to gain `10%` resulting in a very sparsely labeled dataset.  Likewise, using a ratio of `0.1% : 0.005%` could be too low, especially when considering transaction fees (to be discussed later).  It's also worth mentioning that using a percentage might result in inconsistencies since some currency pairs are more volatile than others and volatility for a given pair can change over time.  For this reason, forex traders sometimes use a ratio of the ATR.  For example, using an ATR `2:1` ratio is a good place to start.
 
-Models generally perform better on balanced data so getting half of the labels to be `1` is ideal.  But achieving this with a ratio that is consistent and profitable may not be practical.  To find a good ratio, different multiples are generated and the percent of `1`'s is plotted.  On the below ATR ratio figure, the multiple of `2x` means the numerator is `2` times the denominator, where the denominator is the `x-axis` value.  Therefore, when `x-axis = 3` the ratio is `6:3`.  When the multiple is `4x` and `x-axis = 2`, the ratio is `8:2`, etc.  For the percentage ratio, `x-axis` represents the numerator, and the denominator is then the numerator divided by the legend's label.  For example, when `x-axis = 0.01` for the `/2` line, the ratio is `1.0% : 0.5%`.
+Models generally perform better on balanced data so getting half of the labels to be `1` is ideal.  But achieving this with a ratio that is consistent and profitable may not be practical.  To find a good ratio, different multiples are generated and the percent of `1`'s is plotted.  On the below ATR ratio figure, the multiple of `2x` means the numerator is `2` times the denominator, where the denominator is the `x-axis` value.  Therefore, when `x-axis = 3` the ratio is `6:3`.  When the multiple is `4x` and `x-axis = 2`, the ratio is `8:2`, etc.  For the percentage ratio, the `x-axis` represents the numerator, and the denominator is then the numerator divided by the legend's label.  For example, when `x-axis = 0.01` for the `/2` line, the ratio is `1.0% : 0.5%`.
 
 <p align="center"><img src='images/find_ratio.png' alt='images/find_ratio.png'></p>
 <center><b>Figure X</b> - Finding the best ratios to maximize label data using a window of <code>30</code> on ETHBTC 15-minute candles.</center>
@@ -157,7 +157,7 @@ Unsurprisingly, as the ratio grows or ratio multiple grows, fewer buy opportunit
 
 ### Building Xy Datasets
 
-The imbalance of a dataset is not the only criteria for determining if one ratio is better than another, but it does give a sense.  To explore this further, several labeled datasets are generated with different labelling strategies by changing ratios, the window, and the whether the ratio represents a percentage or ATR ratio.  The following table shows 12 different labeled datasets generated that are used to compare different model performances.
+The imbalance of a dataset is not the only criteria for determining if one ratio is better than another, but it does give a sense.  To explore this further, several labeled datasets are generated with different labeling strategies by changing ratios, the window, and whether the ratio represents a percentage or the ATR ratio.  The following table shows 12 different labeled datasets generated that are used to compare different model performances.
 
 |dataset|use_atr|ratio|reverse|window|size|true_labels|imbalance|train_imbal|test_imbal|
 |:-|:-:|:-:|:-:|:-:|-:|-:|-:|-:|-:|
@@ -189,9 +189,9 @@ In 2017, Binance started reporting figures and it took some time for these to de
 
 ### Simulating Trades on Labeled Data
 
-To get a sense of what an ideal profit would look like for each of the labelling strategies, it is necessary to run them through a simulator.  Why is this necessary?  Why can't this be calculated from the above figures?  To answer this, imagine having two candles, one after another, where the labeling has marked both as `1`.  In a deployed model, when a buy signal is received, all available currency will be spent.  When evaluating the next candlestick data, the model will be evaluating for selling, not buying, so that candlestick will not be evaluated for a buy opportunity.
+To get a sense of what an ideal profit would look like for each of the labeling strategies, it is necessary to run them through a simulator.  Why is this necessary?  Why can't this be calculated from the above figures?  To answer this, imagine having two candles, one after another, where the labeling has marked both as `1`.  In a deployed model, when a buy signal is received, all available currency will be spent.  When evaluating the next candlestick data, the model will be evaluating for selling, not buying, so that candlestick will not be evaluated for a buy opportunity.
 
-The simulator logic is the same logic as in the deployed model pipeline but instead of looking at the predictions, it looks at the validation labeled data which is already guaranteed to contain profitable trades assuming it uses the same ratio and other hyperparameters as the dataset's labelling strategy.  The simulator works, in short, by progressing through the labeled data, looking for the next buy opportunity, calculates the target and stop-loss prices, finds the next record that surpasses one of these, calculating the profit/loss along with any fees, and then repeats the process until it reaches the end.  The last sell indicates the maximized profit achievable for the dataset.  The below table shows how each dataset's number of trades and maximized profit based on a starting value of `1 ETH` and a fee of `0.1%` for each buy or sell transaction using the validation data.
+The simulator logic is the same logic as in the deployed model pipeline but instead of looking at the predictions, it looks at the validation labeled data which is already guaranteed to contain profitable trades assuming it uses the same ratio and other hyperparameters as the dataset's labeling strategy.  The simulator works, in short, by progressing through the labeled data, looking for the next buy opportunity, calculates the target and stop-loss prices, finds the next record that surpasses one of these, calculating the profit/loss along with any fees, and then repeats the process until it reaches the end.  The last sell indicates the maximized profit achievable for the dataset.  The below table shows how each dataset's number of trades and maximized profit based on a starting value of `1 ETH` and a fee of `0.1%` for each buy or sell transaction using the validation data.
 
 |dataset|sim_num_trades|sim_max_profit|sim_bad_trades|
 |:-|-:|-:|-:|
@@ -226,13 +226,13 @@ For each of the datasets, a set of base classifiers are trained.  Below is a tab
 
 One note about the `MLPClassifier`: since this classifier is sensitive to scaling, `make_pipeline()` with `StandardScaler()` is used.
 
-This exercise determines the F1-score, precision, recall and the simulator's profit on the validation set for each dataset/classifier combination resulting in `84` results.  This was performed two more times on the same datasets and classifiers but first reducing the number of lookbacks from `14` to `3` and then to `0` thus reducing the number of features each time and ending up with a total of 252 trained model results.
+This exercise determines the F1-score, precision, recall, and the simulator's profit on the validation set for each dataset/classifier combination resulting in `84` results.  This was performed two more times on the same datasets and classifiers but first reducing the number of lookbacks from `14` to `3` and then to `0` thus reducing the number of features each time and ending up with a total of 252 trained model results.
 
 ### Identifying Best Performing Dataset/Classifier Combinations
 
-When it comes to ranking best performance, precision is a good starting point.  A high precision means the model has reduced the number of false positives (FP).  In other words, it reduced the chance of predicting a buy that is unprofitable--the absolute worst case that should be avoided.  A low recall, on the other hand, just means the model is predicting fewer buy opportunities than expected.  This is generally fine so long as it does predict buys often enough (one true positive every couple of days on average).
+When it comes to ranking the performance, precision is a good starting point.  A high precision means the model has reduced the number of false positives (FP).  In other words, it reduced the chance of predicting a buy that is unprofitable--the absolute worst case that should be avoided.  A low recall, on the other hand, just means the model is predicting fewer buy opportunities than expected.  This is generally fine so long as it does predict buys often enough (one true positive every couple of days on average).
 
-Looking at precision alone can be misleading.  On the extreme side, a precision of `1.0` is perfect precision but if recall was very low, such as having only one `1` true positive (TP), the model would be ineffective since it so rarely makes predictions.  For this reason, the F1-score is not a good show of performance, and several factors must be considered.  Maximizing precision and the number of TPs is the overall goal.  Ranking based on the number TPs does little in the way of explaining performance if the number of FPs is still high. Therefore, ranking is performed first on precision, second on the difference between TPs and FPs and then on the ratio between. The top 10 models based on this ranking is shown in the table below.
+Looking at precision alone can be misleading.  On the extreme side, a precision of `1.0` is perfect precision but if the recall was very low, such as having only one `1` true positive (TP), the model would be ineffective since it so rarely makes predictions.  For this reason, the F1-score is not a good show of performance, and several factors must be considered.  Maximizing precision and the number of TPs is the overall goal.  Ranking based on the number of TPs does little in the way of explaining performance if the number of FPs is still high. Therefore, ranking is performed first on precision, second on the difference between TPs and FPs and then on the ratio between. The top 10 models based on this ranking are shown in the table below.
 
 |Rank|Classifier|Dataset|Lookbacks|TP|FP|Diff|Ratio|Precision|Recall|Sim. Profit|
 |-:|:-|:-|-:|-:|-:|-:|-:|-:|-:|-:|
@@ -258,25 +258,25 @@ Many logistic regression models outperformed other models and are easy to train 
 
 Where *r_j* is the prediction result for the *j*th record, *p_m[i]* is the prediction of *i*th model in *m*, *c_m[i]* is the precision of said model, and *t* is the hyperparameter threshold.  Any model that has a validation set precision of `0` would always be zeroed out so these models will not be included in the ensemble.
 
-Finding a good value for *t* can be achieved by trying out by measuring the precision, recall and simulated profit.  Another issue that needs to be considered is that the datasets use different ratios so which ratio should be used on the ensemble?  It stands to reason that the model/dataset with the highest precision should be used since that carries the most weight.  However, simulations show this is not always the case as will be shown later with the scaled version shown later.  For the logistic regression, it so happens that these are aligned.  In the below figure, profit is maximized at threshold of `0.12` with a value of `1.86` which surpasses any individual model simulation performance.
+Finding a good value for *t* can be achieved by trying out by measuring the precision, recall, and simulated profit.  Another issue that needs to be considered is that the datasets use different ratios so which ratio should be used on the ensemble?  It stands to reason that the model/dataset with the highest precision should be used since that carries the most weight.  However, simulations show this is not always the case as will be shown later with the scaled version shown later.  For the logistic regression, it so happens that these are aligned.  In the below figure, profit is maximized at a threshold of `0.12` with a value of `1.86` which surpasses any individual model simulation performance.
 
 <p align="center"><img src='images/ensemble_find_t.png' alt='images/ensemble_find_t.png'></p>
-<center><b>Figure X</b> - Simulated precision, recall and profit for varying thresholds on a Logistic Regression ensemble.</center>
+<center><b>Figure X</b> - Simulated precision, recall, and profit for varying thresholds on a Logistic Regression ensemble.</center>
 
 ### Scaling Data in Isolation
 
-There is a forex theory that a good strategy is generalizable, in that it can be applied to any currency pair, even opposite pairs, and be profitable.  All models previously train (except for the MLP) have not been scaled so it is impractical to expect one of these models perform well for both ETH to BTC and the opposite BTC to ETH.  Likewise, using standard scaling, like done for the MLP, is also not practical since the dataset for BTC to ETH trades is scaled very differently.  So, can the data be scaled in isolation?  The answer is yes, but at the cost of zeroing-out one of the features.  By defining the open price as the mean and using the close, high, and low in the calculation of a standard deviation, all price data can be scaled such that one standard deviation difference is -1 or 1.  The formula can be described as the following:
+There is a forex theory that a good strategy is generalizable, in that it can be applied to any currency pair, even opposite pairs, and be profitable.  All models previously train (except for the MLP) have not been scaled so it is impractical to expect one of these models to perform well for both ETH to BTC and the opposite BTC to ETH.  Likewise, using standard scaling, like done for the MLP, is also not practical since the dataset for BTC to ETH trades is scaled very differently.  So, can the data be scaled in isolation?  The answer is yes, but at the cost of zeroing out one of the features.  By defining the open price as the mean and using the close, high, and low in the calculation of a standard deviation, all price data can be scaled such that one standard deviation difference is -1 or 1.  The formula can be described as the following:
 
 <p align="center"><img src='images/eq_scaler.png' alt='images/eq_scaler.png'></p>
 
-Using this scaling algorithm, each record is individually scaled independent of the other data in the dataset.  Repeating the same model/dataset comparison using this scaler produces another 252 trained models.  Many of the logistic regression models returned profits in simulation of `ETHBTC` suggesting again an ensemble might outperform a single model.
+Using this scaling algorithm, each record is individually scaled independently of the other data in the dataset.  Repeating the same model/dataset comparison using this scaler produces another 252 trained models.  Many of the logistic regression models returned profits in the simulation of `ETHBTC` suggesting again an ensemble might outperform a single model.
 
 ### Ensemble with Custom Scaling
 
-Using the scaler discussed previously, a new ensemble of logistic regression models can be produced with the goal of having a model that be able to perform on both `ETHBTC` and `BTCETH` trading.  Again, a threshold and ratio are brute forced.  In the below figure, profit is maximized at threshold of `0.10` with a value of `1.35` again surpassing any individual model simulation performance.  This time, the profit is maximized with a ratio of `4:2` in contrast with the highest precision dataset being `2:1`.
+Using the scaler discussed previously, a new ensemble of logistic regression models can be produced with the goal of having a model that be able to perform on both `ETHBTC` and `BTCETH` trading.  Again, a threshold and ratio are brute-forced.  In the below figure, profit is maximized at a threshold of `0.10` with a value of `1.35` again surpassing any individual model simulation performance.  This time, the profit is maximized with a ratio of `4:2` in contrast with the highest precision dataset being `2:1`.
 
 <p align="center"><img src='images/scaled_ensemble_find_t.png' alt='images/scaled_ensemble_find_t.png'></p>
-<center><b>Figure X</b> - Simulated precision, recall and profit for varying thresholds on a scaled Logistic Regression ensemble.</center>
+<center><b>Figure X</b> - Simulated precision, recall, and profit for varying thresholds on a scaled Logistic Regression ensemble.</center>
 
 ### Deep Neural Network
 
@@ -291,12 +291,12 @@ To see how a deep neural network can perform on the same datasets used to train 
 |nm_torch1_alpha37|CustomScaler1|32|AdamW|0.006|
 |nm_torch1_alpha38|CustomScaler1|128|AdamW|0.03|
 
-Below is a figure of the training and validations results of this subset of models.  While 20 epochs is still quite young for a comprehensive analysis, some trends do start to appear which only become more pronounced with further epochs and as many as 100 when the training set begins to converge.
+Below is a figure of the training and validations results of this subset of models.  While 20 epochs are still quite young for a comprehensive analysis, some trends do start to appear which only become more pronounced with further epochs and as many as 100 when the training set begins to converge.
 
 <p align="center"><img src='images/resnet28_res.png' alt='images/resnet28_res.png'></p>
-<center><b>Figure X</b> - Simulated precision, recall and profit for varying thresholds on a scaled Logistic Regression ensemble.</center>
+<center><b>Figure X</b> - Simulated precision, recall, and profit for varying thresholds on a scaled Logistic Regression ensemble.</center>
 
-The general trend that is consistent across all models is that the training loss drops predictably and consistently but the validation loss steeply rises after just a few epochs.  The recall on the validation set generally does slowly improve which also improves the F1-score but the precision remains erratic, averaging around `0.5`.  This unexpected behavior is likely due to a shift in the how the `ETHBTC` market behaves over time, so the model is learning a strategy that is no longer profitable in 2021.  To validate this, each model was simulated with the results in the below table.
+The general trend that is consistent across all models is that the training loss drops predictably and consistently but the validation loss steeply rises after just a few epochs.  The recall on the validation set generally does slowly improve which also improves the F1-score but the precision remains erratic, averaging around `0.5`.  This unexpected behavior is likely due to a shift in how the `ETHBTC` market behaves over time, so the model is learning a strategy that is no longer profitable in 2021.  To validate this, each model was simulated with the results in the below table.
 
 |Model Name|Buys|Starting Value|Ending Value|
 |:-|-:|:-:|:-|
@@ -309,31 +309,31 @@ The general trend that is consistent across all models is that the training loss
 
 # Statistical Arbitrage
 ## What is Statistical Arbitrage
-Statistical Arbitrage, also known as stat arb, refers to trading strategies that uses statistical techniques to profit from patterns between financial instruments. Gerry Bamberger developed the first arbitrage strategy using pairs trading at Morgan Stanley in the 1980s. There are multiple types of Statistical Arbitrage. Market Neutral Arbitrage, Cross Asset Arbitrage and Cross Market Arbitrage are most commonly used. Since we are focusing on cryptocurrency spot market and the product type is similar to vanilla FX without other underlyings, Market Neutral Arbitrage is the natural choice for building a portfolio with multiple bitcoin pairs. As its name suggests, the returns of Market Neutral Arbitrage strategy are not affected by the market's price movment. Hence, it is market-netural with a beta of zero.
+Statistical Arbitrage, also known as stat arb, refers to trading strategies that use statistical techniques to profit from patterns between financial instruments. Gerry Bamberger developed the first arbitrage strategy using pairs trading at Morgan Stanley in the 1980s. There are multiple types of Statistical Arbitrage. Market Neutral Arbitrage, Cross Asset Arbitrage, and Cross Market Arbitrage are most commonly used. Since we are focusing on the cryptocurrency spot market and the product type is similar to vanilla FX without other underlyings, Market Neutral Arbitrage is the natural choice for building a portfolio with multiple bitcoin pairs. As its name suggests, the returns of Market Neutral Arbitrage strategy are not affected by the market's price movement. Hence, it is market-neutral with a beta of zero.
 
 ## Mean Reversion Strategy and Pairs Trading
 Statistical Arbitrage strategy uses mean reversion principle to take advantage of the price inefficiencies between a group of securities. For instance, if you have a pair of instruments that share similar fundamentals and belong to the same sectors, even though in the short term the price may fluctuate, it is expected that these instruments behave similarly and the ratio or spread of such instruments to remain constant. Based on the mean reversion principle, if one instrument outperforms the other, it is temporary and will converge to the normal level in time. You can execute pairs trading to buy the underperforming instrument and sell the outperforming instrument.
 
 ## Cointegration
-To develop mathematical models that best describe the data, we perform time series analysis. Such analysis usually involves methods like ordinary least squares with a key assumption that the statistical properties of the time series such as variances and means are constant. Non-stationary time series (or unit root variables) fail to meet this assumption. Therefore, these time series need to be analyzed with a different method called **cointegration**. More formally, the series $X_t$ and $Y_t$ are cointegrated if there exist a linear combination of them which is *stationary* i.e:   ![formula122.JPG](images/formula122.JPG) where $\epsilon_t$ is a *stationary* time series.
+To develop mathematical models that best describe the data, we perform time series analysis. Such analysis usually involves methods like ordinary least squares with a key assumption that the statistical properties of the time series such as variances and means are constant. Non-stationary time series (or unit root variables) fail to meet this assumption. Therefore, these time series need to be analyzed with a different method called **cointegration**. More formally, the series $X_t$ and $Y_t$ are cointegrated if there exists a linear combination of them which is *stationary* i.e:   ![formula122.JPG](images/formula122.JPG) where $\epsilon_t$ is a *stationary* time series.
 
 ## Test for Cointegration
-Intuitively, some linear combination of the time series removes most of auto-covarance and is mostly white noise, which is useful for pairs trading. Since the linear combination of prices of different assets is white noise, we can bet on this relationship to mean revert and trade accordingly.
+Intuitively, some linear combination of the time series removes most of the auto-covarance and is mostly white noise, which is useful for pairs trading. Since the linear combination of prices of different assets is white noise, we can bet on this relationship to mean revert and trade accordingly.
 
 In the case of pair trading we are interested in, we express the linear combination in terms of spread:
 ![formula22.JPG](images/formula22.JPG)
 where we inserted a minus sign to express that we will be long one asset and short another, so that $h$ defined is usually positive. If the spread is stationary, we can say that the currency pairs are cointegrated.
 
-We use **Engle-Granger two-step method** to check whether the spread is stationary. It invovles the following: 1) Regressing one series on another to estimate the stationary long-tern relationship  2) Applying an **Augmented Dickey-Fuller (ADF)** unit-root test to the regression residual.This test is implemented in `statsmodels.tsa.stattools.coint`.
+We use **Engle-Granger two-step method** to check whether the spread is stationary. It involves the following: 1) Regressing one series on another to estimate the stationary long-term relationship  2) Applying an **Augmented Dickey-Fuller (ADF)** unit-root test to the regression residual.This test is implemented in `statsmodels.tsa.stattools.coint`.
 
-We choose five coins which are Bitcoin(BTC/USDT), Ethereum(ETH/USDT), Cardano(ADA/USDT), Ripple(XRP/USDT) and Binance Coin(BNB/USDT). The Engle-Granger test suggests that 3 pairs are cointegrated for a threshold of $\alpha=0.05$. Below heatmap shows the p-values of the cointegration test between each pair of coins.
+We choose five coins which are Bitcoin(BTC/USDT), Ethereum(ETH/USDT), Cardano(ADA/USDT), Ripple(XRP/USDT) and Binance Coin(BNB/USDT). The Engle-Granger test suggests that 3 pairs are cointegrated for a threshold of $\alpha=0.05$. The below heatmap shows the p-values of the cointegration test between each pair of coins.
 
 ![testheatmap.JPG](images/testheatmap.JPG)
 
-## Trading Strategy with spread
-In order to calculate the spread, we use a linear regression to get the beta coefficient. This coefficient can be interpreted as the hedge ratio to make the portfolio of the two coins stationary. In pair trading, we long one coin and simulataneously short *hedge ratio* number of the other coin so that the linear combination of the two coins is stationary. As cryptocurrency market is very volatile, it is more accurate to use rolling beta derived from Rolling Ordinary Least Square (RollingOLS) in order to estimate a hedge ratio that can vary with time.
+## Trading Strategy with Spread
+In order to calculate the spread, we use a linear regression to get the beta coefficient. This coefficient can be interpreted as the hedge ratio to make the portfolio of the two coins stationary. In pair trading, we long one coin and simultaneously short *hedge ratio* number of the other coin so that the linear combination of the two coins is stationary. As the cryptocurrency market is very volatile, it is more accurate to use rolling beta derived from Rolling Ordinary Least Square (RollingOLS) in order to estimate a hedge ratio that can vary with time.
 
-In the stock market, the price ratio of the prices $\frac{S_1}{S_2}$ is often used as a signal. The problem is that the ratio is not necessarily stationary or might not remain stationary throughout the period. And this is a problem we encountered: as we used the price ratio instead of a dynamically chnaging hedge ratio, the two assets stopped being cointegrated after a while and observed some large losses in our daily P&L calculation.
+In the stock market, the price ratio of the prices $\frac{S_1}{S_2}$ is often used as a signal. The problem is that the ratio is not necessarily stationary or might not remain stationary throughout the period. And this is a problem we encountered: as we used the price ratio instead of a dynamically changing hedge ratio, the two assets stopped being cointegrated after a while and observed some large losses in our daily P&L calculation.
 
 The absolute spread is less helpful as the prices of coins can be very different in scale. Thus, we normalize the spread by transforming it to a z-score and use this z-score to derive our trading signal:
 
@@ -341,13 +341,13 @@ The absolute spread is less helpful as the prices of coins can be very different
 
 2. We exit trades when the spread changes sign which signals a mean reversion.
 
-Let's focus on the cointegrated pair (ETH/USDT, ADA/USDT) and visualize the price series, rolling beta, z-score and the performance of the strategy against the benchmark (buy and hold). As explained above, we use statistics based on rolling windows to incorporate more recent data - a short window of one hour to smooth-out the current spread information, a long window of 12 hours as a measure of the rolling mean as well as a 12 hours rolling standard deviation. The strategy outperforms buy and hold individual coins excluding costs.
+Let's focus on the cointegrated pair (ETH/USDT, ADA/USDT) and visualize the price series, rolling beta, z-score, and the performance of the strategy against the benchmark (buy and hold). As explained above, we use statistics based on rolling windows to incorporate more recent data - a short window of one hour to smooth out the current spread information, a long window of 12 hours as a measure of the rolling mean as well as a 12 hours rolling standard deviation. The strategy outperforms buy and hold individual coins excluding costs.
 
 ![pairtrading1.JPG](images/pairtrading1.JPG)
 ![pairtrading2.JPG](images/pairtrading2.JPG)
 
 ## Risks of Statistical Arbitrage
-Statistical arbitrage models contain both *systemic* and *idiosyncratic* risks. As a result of economy and market condition, cointegrated cryptocurrencies can stop cointegrate at some point in time. In our case, the cointegration hypothesis is not validated on the out-sample data (30% of the data history) at 10% threshold - recall that the same hypothesis cannot be rejected at 5% threshold on the in-sample data. As a matter of fact, the same strategy proves to be not as profitable as a buy and hold in each individual coin. Thus, it is important to make sure that such a relationship persists during the time period of interest. Another challenge is that once enough players discover the statistical relationship, the arbitrage opportunities usually diminish or simply disappear.
+Statistical arbitrage models contain both *systemic* and *idiosyncratic* risks. As a result of the economy and market conditions, cointegrated cryptocurrencies can stop cointegrate at some point in time. In our case, the cointegration hypothesis is not validated on the out-sample data (30% of the data history) at 10% threshold - recall that the same hypothesis cannot be rejected at 5% threshold on the in-sample data. As a matter of fact, the same strategy proves to be not as profitable as a buy and hold in each individual coin. Thus, it is important to make sure that such a relationship persists during the time period of interest. Another challenge is that once enough players discover the statistical relationship, the arbitrage opportunities usually diminish or simply disappear.
 
 ![pairtrading3.JPG](images/pairtrading3.JPG)
 
@@ -360,7 +360,7 @@ An AWS credit of 600 USD was used to build a scalable production environment whe
 
 ## Amazon Relational Database Service
 
-Amazon RDS with a PostgreSQL engine was selected for its familiarity and expandability.  A low performance instance of size t2.micro is sufficient with the current dataset size and loading based on simulation usage despite being the second smallest t2 instance.
+Amazon RDS with a PostgreSQL engine was selected for its familiarity and expandability.  A low-performance instance of size t2.micro is sufficient with the current dataset size and loading based on simulation usage despite being the second smallest t2 instance.
 
 The RDS database consists of 7 tables:
 
@@ -369,10 +369,10 @@ The RDS database consists of 7 tables:
 | pairs | Defines the currency pair information |
 | candlestick_15m | The raw 15m candlestick data |
 | features | Engineered features based candlestick data |
-| environment | Defines the simulation environment, such as starting funds, fee structures and the currency pair |
+| environment | Defines the simulation environment, such as starting funds, fee structures, and the currency pair |
 | strategy | Defines the trading strategy configurations and parameters |
-| simulation | Defines the simulation based on an environment and a strategy, while keeping track of persistent variables. |
-| simulation_records | Historical records of all period for each simulation. |
+| simulation | Defines the simulation based on an environment and a strategy while keeping track of persistent variables. |
+| simulation_records | Historical records of all periods for each simulation. |
 
 <p align="center"><img src='images/rds.png' alt='ER Diagram of the Database'></p>
 <center><b>Figure X</b> - ER Diagram of the Database.</center>
@@ -381,9 +381,9 @@ The SQL files to recreate the database are available [here](https://github.com/m
 
 ## AWS Lambda and the Serverless Application Model
 
-AWS Lambda, a managed serverless service, was selected as the primary compute resource to handle the cloud computing that keeps the database up-to-date and the simulations running.  Lambda was selected instead of Elastic Compute Cloud (EC2) because of the nature of the data and simulation, where the majority of the computations are performed at regular intervals with long idling periods in between.  As opposed to EC2, Lambda excels at automatic scaling and its pricing scheme matches with spikes in computational load.  With the Lambda setup, hundreds of simulations can be done in seconds while it takes up to minutes to do the same with a similary specified EC2 resource.
+AWS Lambda, a managed serverless service, was selected as the primary compute resource to handle the cloud computing that keeps the database up-to-date and the simulations running.  Lambda was selected instead of Elastic Compute Cloud (EC2) because of the nature of the data and simulation, where the majority of the computations are performed at regular intervals with long idling periods in between.  As opposed to EC2, Lambda excels at automatic scaling and its pricing scheme matches with spikes in computational load.  With the Lambda set up, hundreds of simulations can be done in seconds while it takes up to minutes to do the same with a similarly specified EC2 resource.
 
-To deploy the Lambda functions, the AWS Serverless Application Model (SAM) framework is used.  The SAM framework automatically manages AWS infrastructures through configuration files.  Once configured, Lambda functions and its settings, security, and network configurations can be updated and deployed automatically.  The Lambda functions are packaged as container images and uploaded to the Amazon Elastic Container Registry, allowing for version control.
+To deploy the Lambda functions, the AWS Serverless Application Model (SAM) framework is used.  The SAM framework automatically manages AWS infrastructures through configuration files.  Once configured, Lambda functions and their settings, security, and network configurations can be updated and deployed automatically.  The Lambda functions are packaged as container images and uploaded to the Amazon Elastic Container Registry, allowing for version control.
 
 The following Lambdas perform the AWS compute:
 
@@ -394,7 +394,7 @@ The following Lambdas perform the AWS compute:
 
 ## Amazon Simple Storage Service, Elastic File System, and DataSync
 
-To store the model assets on AWS, Amazon S3 and EFS managed storage service are used.  The main difference between S3 and EFS is that S3 is an object store while EFS is a file system for compute services.  Both storage services are used as they provide different benefits in the workflow.
+To store the model assets on AWS, Amazon S3 and EFS managed storage services are used.  The main difference between S3 and EFS is that S3 is an object store while EFS is a file system for compute services.  Both storage services are used as they provide different benefits in the workflow.
 
 |  | S3 | EFS |
 | --- | --- | --- |
@@ -402,11 +402,11 @@ To store the model assets on AWS, Amazon S3 and EFS managed storage service are 
 | File Management | Anytime directly through AWS console or GUI and CLI clients | Must be mounted by a compute service such as EC2 with remote file transfer service to make changes |
 | File System Access | Objects must be copied to local file system before use | Can be accessed directly once mounted |
 
-S3 provides a simplier interface for uploading model assets such as pre-trained classifiers, neural networks, and scalers since a compute resource isn't necessary.  EFS, on the other hand, works more efficiently with the Lambda functions by not needing to copy assets everytime the function has a cold start.  To combine the convenience of S3 and efficiency of EFS, a synchronizing task is used called Amazon DataSync to copy the S3 files to the EFS drive by manually triggering the event each time new assets are uploaded to S3.  Although not configured as such, it is possible to set the task to automatically execute everytime objects in the S3 buckets were updated, making it a fully automated process.
+S3 provides a simple interface for uploading model assets such as pre-trained classifiers, neural networks, and scalers since a compute resource isn't necessary.  EFS, on the other hand, works more efficiently with the Lambda functions by not needing to copy assets every time the function has a cold start.  To combine the convenience of S3 and efficiency of EFS, a synchronizing task is used called Amazon DataSync to copy the S3 files to the EFS drive by manually triggering the event each time new assets are uploaded to S3.  Although not configured as such, it is possible to set the task to automatically execute every time objects in the S3 buckets were updated, making it a fully automated process.
 
 ## Amazon Simple Queue Service
 
-When the `BinanceCrawlerFunction` Lambda processes a complete candlestick for a particular cryptocurrency pair, it enqueues that pair's simulation task on a queue in AWS's Simple Queue Service (SQS).  This queue then triggers the `SwapSimulationFunction` Lambda with the pair ID as its parameter. SQS was chosen for how setup ease as well as its integration with Lambda functions.
+When the `BinanceCrawlerFunction` Lambda processes a complete candlestick for a particular cryptocurrency pair, it enqueues that pair's simulation task on a queue in AWS's Simple Queue Service (SQS).  This queue then triggers the `SwapSimulationFunction` Lambda with the pair ID as its parameter. SQS was chosen for how easy it is to set up as well as its integration with Lambda functions.
 
 ## Detailed Flow Diagram
 
@@ -422,21 +422,21 @@ The main flows are:
 | Scheduler triggering Binance Crawler Function | A scheduler triggers the crawler periodically to get new candlestick data.  Any data that is updated will be saved to the database, with the latest (not yet closed) candlestick data marked as such. | If the `open_time` for the latest candlestick changed, additional simulation messages are queued for the simulation function. |
 | Database triggers | Multiple database triggers are used to automatically generate features once a candlestick is closed. | As the triggers are performed before the records are created, these features are created before the crawler enqueues the simulation messages. |
 | Deploy model assets | New models can be deployed without having to redeploy the Lambda functions by uploading the files to S3 and executing the DataSync task. | With about a 2-3 minute wait time, the new assets will be deployed to the EFS accessible by the Lambda functions. |
-| Configure simulation | Configurations for simulations can be done directly in the `strategy`, `environment` and `simulation` database tables, with custom parameters specified for each strategy. | Once the simulation entries are setup, it will automatically run starting from the beginning during the next period. |
+| Configure simulation | Configurations for simulations can be done directly in the `strategy`, `environment`, and `simulation` database tables, with custom parameters specified for each strategy. | Once the simulation entries are set up, the simulation will automatically run starting from the beginning during the next period. |
 
 ## Amazon QuickSight
 
-Amazon QuickSight is a business intelligence service.  It provides similar features with that of Power BI and Tableau, but has a tighter integration with the AWS ecosystem, such as directly accessing data from the RDS.  For this project, QuickSight was used to visualize ongoing cumulative returns for each simulation, with additional interactive features such as filtering and grouping for further comparisons.
+Amazon QuickSight is a business intelligence service.  It provides similar features to that of Power BI and Tableau, but have tighter integrations with the AWS ecosystem, such as directly accessing data from the RDS.  For this project, QuickSight was used to visualize ongoing cumulative returns for each simulation, with additional interactive features such as filtering and grouping for further comparisons.
 
 <p align="center"><img src='images/quicksight.png' alt='Amazon QuickSight'></p>
 <center><b>Figure X</b> - Amazon QuickSight visualization.</center>
 
 ## Amazon CloudWatch
 
-Amazon CloudWatch is AWS's monitoring service.  Logs from various services are sent to CloudWatch, where entires individually or visually as a group can be examined.  Dashboards can be created for a centralized view of all related services and alerts can be configured for when certain thresholds are exceeded.  A dashboard was created to monitoring RDS, SQS, and Lambda's metrics and performances.  Periodic spikes can be observed due to regularity of incoming candlestick data and resulting simulation computations.
+Amazon CloudWatch is AWS's monitoring service.  Logs from various services are sent to CloudWatch, where entires individually or visually as a group can be examined.  Dashboards can be created for a centralized view of all related services and alerts can be configured for when certain thresholds are exceeded.  A dashboard was created to monitoring RDS, SQS, and Lambda's metrics and performances.  Periodic spikes can be observed due to the regularity of incoming candlestick data and resulting simulation computations.
 
 <p align="center"><img src='images/cloudwatch.png' alt='Amazon Cloudwatch'></p>
-<center><b>Figure X</b> - Amazon CloudWatch monitoring dashboard showing syste under regular load and usage.</center>
+<center><b>Figure X</b> - Amazon CloudWatch monitoring dashboard showing system under regular load and usage.</center>
 
 # Evaluation
 
@@ -444,11 +444,11 @@ Amazon CloudWatch is AWS's monitoring service.  Logs from various services are s
 
 ## Statistical Arbitrage Simulation
 
-Currently, the simulation framework only provides data and features for the cryptocurrency pair that its environment specifies.  Unfortunately, the statistical arbitrage method requires additional data to be passed into the simulation function for it to be able to make predictions.  The ability to pass data from other pairs was out of scope and although it was required for the statistical arbitrage method, we were unable to fit it in before submission.  With the current simulation framework, the additional data required can be requested through an optional parameters or fetched directly from the database in the prediction method.
+Currently, the simulation framework only provides data and features for the cryptocurrency pair that its environment specifies.  Unfortunately, the statistical arbitrage method requires additional data to be passed into the simulation function for it to be able to make predictions.  The ability to pass data from other pairs was out of scope and although it was required for the statistical arbitrage method, we were unable to fit it in before submission.  With the current simulation framework, the additional data required can be requested through optional parameters or fetched directly from the database in the prediction method.
 
 ## Paper Trading on Binance
 
-Binance offers a Demo Exchange to test strategies using virtual capital.  By building support for this Demo Exchange, we can get more realistic fees and slippage and allow us to evaluate our best strategies with better confidence.  The Demo Exchange supports API calls.  A potential implementation method for this is to set up a new SQS queue with the purpose of executing trades on the Demo Exchange, then it will require minimal changes on the current simulation function - only sending a message whenever a strategy calls for a buy or sell action.  Additional checking on the execution and validation of such actions can be done on a separate trading function which is specifically built.  In addition to that, we can also pull out the current simulation code as a dummy exchange and plug in exchanges as a parameter for the environment, allowing for additional exchanges to be added in the future.
+Binance offers a Demo Exchange to test strategies using virtual capital.  By building support for this Demo Exchange, we can get more realistic fees and slippage and allow us to evaluate our best strategies with better confidence.  The Demo Exchange supports API calls.  A potential implementation method for this is to set up a new SQS queue with the purpose of executing trades on the Demo Exchange, then it will require minimal changes on the current simulation function - only sending a message whenever a strategy calls for a buy or sell action.  Additional checking on the execution and validation of such actions can be done on a separate trading function that is specifically built.  In addition to that, we can also pull out the current simulation code as a dummy exchange and plug in exchanges as a parameter for the environment, allowing for additional exchanges to be added in the future.
 
 # Statement of work
 
