@@ -293,7 +293,7 @@ To see how a deep neural network can perform on the same datasets used to train 
 
 Below is a figure of the training and validations results of this subset of models.  While 20 epochs are still quite young for a comprehensive analysis, some trends do start to appear which only become more pronounced with further epochs and as many as 100 when the training set begins to converge.
 
-<p align="center"><img src='images/resnet28_res.png' alt='images/resnet28_res.png'></p>
+<p align="center"><a href='images/resnet28_res.png' target='_blank'><img src='images/resnet28_res.png' alt='images/resnet28_res.png'></a></p>
 <center><b>Figure X</b> - Simulated precision, recall, and profit for varying thresholds on a scaled Logistic Regression ensemble.</center>
 
 The general trend that is consistent across all models is that the training loss drops predictably and consistently but the validation loss steeply rises after just a few epochs.  The recall on the validation set generally does slowly improve which also improves the F1-score but the precision remains erratic, averaging around `0.5`.  This unexpected behavior is likely due to a shift in how the `ETHBTC` market behaves over time, so the model is learning a strategy that is no longer profitable in 2021.  To validate this, each model was simulated with the results in the below table.
@@ -348,8 +348,8 @@ The absolute spread is less helpful as the prices of coins can be very different
 
 Let's focus on the cointegrated pair (ETH/USDT, ADA/USDT) and visualize the price series, rolling beta, z-score, and the performance of the strategy against the benchmark (buy and hold). As explained above, statistics based on rolling windows is used to incorporate more recent data - a short window of one hour to smooth out the current spread information, a long window of 12 hours as a measure of the rolling mean as well as a 12 hours rolling standard deviation. The strategy outperforms buy and hold individual coins excluding costs.
 
-![p1.png](images/p1.png)
-![p2.png](images/p2.png)
+<p align="center"><a href='images/p1.png' target='_blank'><img src='images/p1.png' alt='images/p1.png'></a></p>
+<p align="center"><a href='images/p2.png' target='_blank'><img src='images/p2.png' alt='images/p2.png'></a></p>
 
 ## Risks of Statistical Arbitrage
 Statistical arbitrage models contain both *systemic* and *idiosyncratic* risks. As a result of the economy and market conditions, cointegrated cryptocurrencies can stop cointegrate at some point in time. In this case, the cointegration hypothesis is not validated on the out-sample data (30% of the data history) at 10% threshold - recall that the same hypothesis cannot be rejected at 5% threshold on the in-sample data. As a matter of fact, the same strategy proves to be not as profitable as a buy and hold in each individual coin. Thus, it is important to make sure that such a relationship persists during the time period of interest. Another challenge is that once enough players discover the statistical relationship, the arbitrage opportunities usually diminish or simply disappear.
@@ -386,7 +386,7 @@ A typical train-test-split of 80/20 is done using `TimeSeriesSplit` on the data 
 for gridsearch purpose. Hyperparameter tuning iterates under different lags of [1,3,5,7]. From below validation curves, it is evident that the AUC score is not sensitive to the change of hyperparameter C as both training and cross-validation curves are almost flat. All learning curve has a shaded confidence interval band around the cross-validaiton erro which indicates that the preidction errors are more driven by variance than by bias. The cross-validation performance continues to drop from a training size of 10,000 and eventually training and cross-validation scores tend to converge except for lag=1. It is unlikely that additional data will help improve performance. 
 
 
-![p4.png](images/p4.png)
+<p align="center"><a href='images/p4.png' target='_blank'><img src='images/p4.png' alt='images/p4.png'></a></p>
 
 # AWS Infrastructure
 
@@ -411,7 +411,7 @@ The RDS database consists of 7 tables:
 | simulation | Defines the simulation based on an environment and a strategy while keeping track of persistent variables. |
 | simulation_records | Historical records of all periods for each simulation. |
 
-<p align="center"><img src='images/rds.png' alt='ER Diagram of the Database'></p>
+<p align="center"><a href='images/rds.png' target='_blank'><img src='images/rds.png' alt='ER Diagram of the Database'></a></p>
 <center><b>Figure X</b> - ER Diagram of the Database.</center>
 
 The SQL files to recreate the database are available [here](https://github.com/mads-swaps/swap-for-profit/tree/main/aws/rds).
@@ -449,7 +449,7 @@ When the `BinanceCrawlerFunction` Lambda processes a complete candlestick for a 
 
 The completed flow of the AWS architecture can be seen below:
 
-<p align="center"><img src='images/detail_diagram.png' alt='Detailed diagram of AWS services used for data acquisition and simulation'></p>
+<p align="center"><a href='images/detail_diagram.png' target='_blank'><img src='images/detail_diagram.png' alt='Detailed diagram of AWS services used for data acquisition and simulation'></a></p>
 <center><b>Figure X</b> - Detailed diagram of AWS services used for data acquisition and simulation.</center>
 
 The main flows are:
@@ -466,14 +466,14 @@ The main flows are:
 
 Amazon QuickSight is a business intelligence service.  It provides similar features to that of Power BI and Tableau, but have tighter integrations with the AWS ecosystem, such as directly accessing data from the RDS.  For this project, QuickSight was used to visualize ongoing cumulative returns for each simulation, with additional interactive features such as filtering and grouping for further comparisons.
 
-<p align="center"><img src='images/quicksight.png' alt='Amazon QuickSight'></p>
+<p align="center"><a href='images/quicksight.png' target='_blank'><img src='images/quicksight.png' alt='Amazon QuickSight Screenshot'></a></p>
 <center><b>Figure X</b> - Amazon QuickSight visualization.</center>
 
 ## Amazon CloudWatch
 
 Amazon CloudWatch is AWS's monitoring service.  Logs from various services are sent to CloudWatch, where entires individually or visually as a group can be examined.  Dashboards can be created for a centralized view of all related services and alerts can be configured for when certain thresholds are exceeded.  A dashboard was created to monitoring RDS, SQS, and Lambda's metrics and performances.  Periodic spikes can be observed due to the regularity of incoming candlestick data and resulting simulation computations.
 
-<p align="center"><img src='images/cloudwatch.png' alt='Amazon Cloudwatch'></p>
+<p align="center"><a href='images/cloudwatch.png' target='_blank'><img src='images/cloudwatch.png' alt='Amazon Cloudwatch Screenshot'></a></p>
 <center><b>Figure X</b> - Amazon CloudWatch monitoring dashboard showing system under regular load and usage.</center>
 
 # Evaluation
@@ -489,7 +489,7 @@ Below table illustrates the evaluation metrics for visualizing the performance o
 
 A function that accepts end of the day portfolio value (close price * quantity) and close price is written to automate portfolio evaluation process. It produces five graphs as per below. Generally speaking, equity curve and cumulative returns curve with positive slope is preferred as it suggests that a strategy is profitable. Observing the time and magnitude of drawdowns provides insights to volatile period of trading, which can be further analyzed for better risk management and alpha capture.
 
-![perfeval.png](images/perfeval.png)
+<p align="center"><a href='images/perfeval.png' target='_blank'><img src='images/perfeval.png' alt='perfeval.png'></a></p>
 
 # Next Steps
 
