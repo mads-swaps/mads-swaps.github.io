@@ -333,7 +333,7 @@ In the case of pairs trading, the linear combination is expressed in terms of sp
 
 Five coins are selected, which are Bitcoin(BTC/USDT), Ethereum(ETH/USDT), Cardano(ADA/USDT), Ripple(XRP/USDT) and Binance Coin(BNB/USDT). The Engle-Granger test suggests that 3 pairs are cointegrated for a threshold of *alpha=0.05*. The below heatmap shows the p-values of the cointegration test between each pair of coins.
 
-![hm0.png](images/hm0.png)
+<p align="center"><img src='images/hm0.png' alt='hm0.png'></p>
 
 ## Trading Strategy with Spread
 In order to calculate the spread, a linear regression is implemented to get the beta coefficient. This coefficient can be interpreted as the hedge ratio to make the portfolio of the two coins stationary. In pair trading, one coin is long and simultaneously *hedge ratio* number of the other coin is short so that the linear combination of the two coins is stationary. As the cryptocurrency market is very volatile, it is more accurate to use rolling beta derived from Rolling Ordinary Least Square (RollingOLS) in order to estimate a hedge ratio that can vary with time.
@@ -377,7 +377,7 @@ The above mentioned indicators such as MA, ATR and RSI are considered as alpha f
 ## Signals
 Signals based on the most recent return are binarized outcomes: 1 if return is positive, 0 otherwise. More precisely the *y* label is encoded as:
 
-![m_equation.png](images/m_equation.png)
+<p align="center"><img src='images/m_equation.png' alt='m_equation.png'></p>
 
 ## Time series and cross-validation
 Cross-validation (CV) is a method for model selection. The main idea behind CV is to split the data several times so that each split is used once as a validation set and the remainder as a training set. A key assumption of CV is that the data is **independently and identically distributed (IID)**. However, financial returns often violates the IID assumptions. Therefore, it is important that splits respect temporal order to avoid **lookahead bias**. This can be achieved using sklearn's `TimeSeriesSplit` class which ensures that the test periods do not overlap and are located at the end of the period available in the data. After a test period is used, it becomes part of the training data that rolls forward and remains constant in size. Parameter tuning is done via `GridSearchCV` with performance metric `roc_auc` score.
