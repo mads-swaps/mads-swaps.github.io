@@ -21,7 +21,7 @@ Forex is short for foreign currency exchange and is the trading of currencies wi
 
 ## Candlestick Charts
 
-A candlestick chart is the standard plot used in visualizing trading activity where a candle is represented by a box plot that visualizes 4 prices within a given period: the high, low, open, and close price.  The box, or body of the candle, is colored based on if the open price is greater than the close and differently if vice versa.  In the below chart, a white candlestick means the close price is higher than the open price meaning the price is going up.  The lines coming out of the candlestick body are called "shadows" or "wicks" and represent the price spread for the given period by extending out to the high and low prices.  An individual candlestick can represent a period as short as a second to days or weeks or more.  The chart below is a 15-minute candlestick chart so each candlestick represents a 15 minute period.
+A candlestick chart is the standard plot used in visualizing trading activity where a candle is represented by a box plot that visualizes 4 prices within a given period: the high, low, open, and close price.  The box, or body of the candle, is colored based on if the open price is greater than the close and differently if vice versa.  In the below chart, a white candlestick means the close price is higher than the open price meaning the price is going up.  The lines coming out of the candlestick body are called "shadows" or "wicks" and represent the price spread for the given period by extending out to the high and low prices.  An individual candlestick can represent a period as short as a second to days or weeks or more.  The chart below is a 15-minute candlestick chart so each candlestick represents a 15-minute period.
 
 <p align="center"><img src='images/15min_candle.png' alt='images/15min_candle.png'></p>
 <center><b>Figure X</b> - Here is an example 15-minute candlestick chart for the Ethereum/Bitcoin cryptocurrency exchange rate.<br>This visualization was rendered using the Python library <a href='https://github.com/matplotlib/mplfinance'><code>mplfinance</code></a>.</center>
@@ -76,7 +76,7 @@ The equation for moving average is the following where *k* is the window size on
 
 ### Average True Range (ATR)
 
-The ATR is an indicator of volatility in the market.  A higher ATR and the price is more likely to jump around which can result in higher gains but at higher risk.  It is calculated by looking at the true range (TR) of the current record and then averaging out over a window typically of size `14`.  This is also useful in determining the target and stop-loss prices which will be discussed in the different strategies.
+The ATR is an indicator of volatility in the market.  A higher ATR means that the price is more likely to jump around which can result in higher gains but at higher risk.  It is calculated by looking at the true range (TR) of the current record and then averaging out over a window typically of size `14`.  This is also useful in determining the target and stop-loss prices which will be discussed in the different strategies.
 
 <p align="center"><img src='images/eq_atr.png' alt='images/eq_atr.png'></p>
 
@@ -138,7 +138,7 @@ In the example below, a buy opportunity is identified at the close of the 4:00am
 
 ### Identifying Buying Opportunities
 
-Using a target and stop-loss approach simplifies the model to a binary classification problem but a new problem is created, there is no labeled data to train on.  The goal here is to create a label for each record.  A record being the data for one candlestick.  This includes the low, high, open, and close prices as well as some additional features such as volume and number of trades.  Using the close price for each record, a target and stop-loss price is calculated using the same threshold ratio that will be used on the deployed model.  Using the example above, a ratio of `1.0% : 0.5%` returns a target price `1.0%` higher than the close price and a stop-loss of `0.5%` below the close price.  The next step is to peek into the future and see what happens first. Does the price reach the target price first or the stop-loss?  If it reaches the target, the record's label will be a `1` meaning "buy".  Another consideration is how far in the future it should look.  This is called the "window".  Typically, 15 future candles are used.  If the price reaches stop-loss first or if the price hovers between the target and stop-loss within the window, the record will be a `0` meaning "not buy".
+Using a target and stop-loss approach simplifies the model to a binary classification problem but a new problem is created, there is no labelled data to train on.  The goal here is to create a label for each record.  A record being the data for one candlestick.  This includes the low, high, open, and close prices as well as some additional features such as volume and number of trades.  Using the close price for each record, a target and stop-loss price is calculated using the same threshold ratio that will be used on the deployed model.  Using the example above, a ratio of `1.0% : 0.5%` returns a target price `1.0%` higher than the close price and a stop-loss of `0.5%` below the close price.  The next step is to peek into the future and see what happens first. Does the price reach the target price first or the stop-loss?  If it reaches the target, the record's label will be a `1` meaning "buy".  Another consideration is how far in the future it should look.  This is called the "window".  Typically, 15 future candles are used.  If the price reaches stop-loss first or if the price hovers between the target and stop-loss within the window, the record will be a `0` meaning "not buy".
 
 A common question is why not make the stop-loss as small as possible?  Setting the stop-loss too small can result in being "wicked out" of a trade.  Looking at the figure above, if the stop-loss is made too small, the wick of the next candle after the buy could poke through resulting in the stop-loss being breached before the target price, thus resulting in a "not buy".  Therefore, setting a higher stop-loss gives some buffer for the price to fluctuate before a gain is achieved while minimizing losses.
 
@@ -146,18 +146,18 @@ For the remainder of the target stop-loss strategy discussion, the strategy will
 
 ### Determining Ideal Ratios
 
-In the example above, a `1.0% : 0.5%` ratio is used but is this a good ratio to use?  Setting a ratio of `10% : 5%` might be too high because it would be unlikely to gain `10%` resulting in a very sparsely labeled dataset.  Likewise, using a ratio of `0.1% : 0.005%` could be too low, especially when considering transaction fees (to be discussed later).  It's also worth mentioning that using a percentage might result in inconsistencies since some currency pairs are more volatile than others and volatility for a given pair can change over time.  For this reason, forex traders sometimes use a ratio of the ATR.  For example, using an ATR `2:1` ratio is a good place to start.
+In the example above, a `1.0% : 0.5%` ratio is used but is this a good ratio to use?  Setting a ratio of `10% : 5%` might be too high because it would be unlikely to gain `10%` resulting in a very sparsely labelled dataset.  Likewise, using a ratio of `0.1% : 0.005%` could be too low, especially when considering transaction fees (to be discussed later).  It's also worth mentioning that using a percentage might result in inconsistencies since some currency pairs are more volatile than others and volatility for a given pair can change over time.  For this reason, forex traders sometimes use a ratio of the ATR.  For example, using an ATR `2:1` ratio is a good place to start.
 
 Models generally perform better on balanced data so getting half of the labels to be `1` is ideal.  But achieving this with a ratio that is consistent and profitable may not be practical.  To find a good ratio, different multiples are generated and the percent of `1`'s is plotted.  On the below ATR ratio figure, the multiple of `2x` means the numerator is `2` times the denominator, where the denominator is the `x-axis` value.  Therefore, when `x-axis = 3` the ratio is `6:3`.  When the multiple is `4x` and `x-axis = 2`, the ratio is `8:2`, etc.  For the percentage ratio, the `x-axis` represents the numerator, and the denominator is then the numerator divided by the legend's label.  For example, when `x-axis = 0.01` for the `/2` line, the ratio is `1.0% : 0.5%`.
 
 <p align="center"><img src='images/find_ratio.png' alt='images/find_ratio.png'></p>
 <center><b>Figure X</b> - Finding the best ratios to maximize label data using a window of <code>30</code> on ETHBTC 15-minute candles.</center>
 
-Unsurprisingly, as the ratio grows or ratio multiple grows, fewer buy opportunities can be found in the data because there are fewer windows where high profits can be achieved and fewer windows where smaller stop-losses don't get wicked out by the volatility of the market.  None of the plots reaches the goal of `50%` but the results provide plenty of options to avoid sparsely labeled data.  From this analysis, the ATR Ratio is maximized at `2:1` with approximately `40%` of the labels being `1`.  The percentage ratio is maximized at `1.0% : 0.5%` with approximately `27%` of the labels being `1`.
+Unsurprisingly, as the ratio grows or ratio multiple grows, fewer buy opportunities can be found in the data because there are fewer windows where high profits can be achieved and fewer windows where smaller stop-losses don't get wicked out by the volatility of the market.  None of the plots reaches the goal of `50%` but the results provide plenty of options to avoid sparsely labelled data.  From this analysis, the ATR Ratio is maximized at `2:1` with approximately `40%` of the labels being `1`.  The percentage ratio is maximized at `1.0% : 0.5%` with approximately `27%` of the labels being `1`.
 
 ### Building Xy Datasets
 
-The imbalance of a dataset is not the only criteria for determining if one ratio is better than another, but it does give a sense.  To explore this further, several labeled datasets are generated with different labeling strategies by changing ratios, the window, and whether the ratio represents a percentage or the ATR ratio.  The following table shows 12 different labeled datasets generated that are used to compare different model performances.
+The imbalance of a dataset is not the only criteria for determining if one ratio is better than another, but it does give a sense.  To explore this further, several labelled datasets are generated with different labeling strategies by changing ratios, the window, and whether the ratio represents a percentage or the ATR ratio.  The following table shows 12 different labeled datasets generated that are used to compare different model performances.
 
 |dataset|use_atr|ratio|reverse|window|size|true_labels|imbalance|train_imbal|test_imbal|
 |:-|:-:|:-:|:-:|:-:|-:|-:|-:|-:|-:|
@@ -187,11 +187,11 @@ Each dataset is also split into train and validation sets according to the table
 
 In 2017, Binance started reporting figures and it took some time for these to develop robustness.  For this reason, 2017 is excluded from the training and testing sets.  The final test set analysis is performed on AWS in simulation using near-live data.
 
-### Simulating Trades on Labeled Data
+### Simulating Trades on Labelled Data
 
-To get a sense of what an ideal profit would look like for each of the labeling strategies, it is necessary to run them through a simulator.  Why is this necessary?  Why can't this be calculated from the above figures?  To answer this, imagine having two candles, one after another, where the labeling has marked both as `1`.  In a deployed model, when a buy signal is received, all available currency will be spent.  When evaluating the next candlestick data, the model will be evaluating for selling, not buying, so that candlestick will not be evaluated for a buy opportunity.
+To get a sense of what an ideal profit would look like for each of the labelling strategies, it is necessary to run them through a simulator.  Why is this necessary?  Why can't this be calculated from the above figures?  To answer this, imagine having two candles, one after another, where the labelling has marked both as `1`.  In a deployed model, when a buy signal is received, all available currency will be spent.  When evaluating the next candlestick data, the model will be evaluating for selling, not buying, so that candlestick will not be evaluated for a buy opportunity.
 
-The simulator logic is the same logic as in the deployed model pipeline but instead of looking at the predictions, it looks at the validation labeled data which is already guaranteed to contain profitable trades assuming it uses the same ratio and other hyperparameters as the dataset's labeling strategy.  The simulator works, in short, by progressing through the labeled data, looking for the next buy opportunity, calculates the target and stop-loss prices, finds the next record that surpasses one of these, calculating the profit/loss along with any fees, and then repeats the process until it reaches the end.  The last sell indicates the maximized profit achievable for the dataset.  The below table shows how each dataset's number of trades and maximized profit based on a starting value of `1 ETH` and a fee of `0.1%` for each buy or sell transaction using the validation data.
+The simulator logic is the same logic as in the deployed model pipeline but instead of looking at the predictions, it looks at the validation labelled data which is already guaranteed to contain profitable trades assuming it uses the same ratio and other hyperparameters as the dataset's labelling strategy.  The simulator works, in short, by progressing through the labeled data, looking for the next buy opportunity, calculates the target and stop-loss prices, finds the next record that surpasses one of these, calculating the profit/loss along with any fees, and then repeats the process until it reaches the end.  The last sell indicates the maximized profit achievable for the dataset.  The below table shows how each dataset's number of trades and maximized profit based on a starting value of `1 ETH` and a fee of `0.1%` for each buy or sell transaction using the validation data.
 
 |dataset|sim_num_trades|sim_max_profit|sim_bad_trades|
 |:-|-:|-:|-:|
@@ -309,18 +309,18 @@ The general trend that is consistent across all models is that the training loss
 
 # Statistical Arbitrage
 ## What is Statistical Arbitrage
-Statistical Arbitrage, also known as stat arb, refers to trading strategies that use statistical techniques to profit from patterns between financial instruments. Gerry Bamberger developed the first arbitrage strategy using pairs trading at Morgan Stanley in the 1980s. There are multiple types of Statistical Arbitrage. Market Neutral Arbitrage, Cross Asset Arbitrage, and Cross Market Arbitrage are most commonly used. Since the focus is on the cryptocurrency spot market and the product type is similar to vanilla FX without other underlyings, Market Neutral Arbitrage is the natural choice for building a portfolio with multiple bitcoin pairs. As its name suggests, the returns of Market Neutral Arbitrage strategy are not affected by the market's price movement. Hence, it is market-neutral with a beta of zero.
+Statistical Arbitrage, also known as stat arb, refers to trading strategies that use statistical techniques to profit from patterns between financial instruments. Gerry Bamberger developed the first arbitrage strategy using pairs trading at Morgan Stanley in the 1980s. There are multiple types of Statistical Arbitrage. Market Neutral Arbitrage, Cross Asset Arbitrage, and Cross Market Arbitrage are most commonly used. Since the focus is on the cryptocurrency spot market and the product type is similar to vanilla FX without other underlying, Market Neutral Arbitrage is the natural choice for building a portfolio with multiple bitcoin pairs. As its name suggests, the returns of Market Neutral Arbitrage strategy are not affected by the market's price movement. Hence, it is market-neutral with a beta of zero.
 
 ## Mean Reversion Strategy and Pairs Trading
 Statistical Arbitrage strategy uses mean reversion principle to take advantage of the price inefficiencies between a group of securities. For instance, if there is a pair of instruments that share similar fundamentals and belong to the same sectors, even though in the short term the price may fluctuate, it is expected that these instruments behave similarly and the ratio or spread of such instruments to remain constant. Based on the mean reversion principle, if one instrument outperforms the other, it is temporary and will converge to the normal level in time. Pairs trading can be executed to buy the underperforming instrument and sell the outperforming instrument.
 
 ## Cointegration
-To develop mathematical models that best describe the data, time series analysis is performed. Such analysis usually involves methods like ordinary least squares with a key assumption that the statistical properties of the time series such as variances and means are constant. Non-stationary time series (or unit root variables) fail to meet this assumption. Therefore, these time series need to be analyzed with a different method called **cointegration**. More formally, the series *X_t* and *Y_t* are cointegrated if there exists a linear combination of them which is *stationary* i.e:   
+To develop mathematical models that best describe the data, time series analysis is performed. Such analysis usually involves methods like ordinary least squares with a key assumption that the statistical properties of the time series such as variances and means are constant. Non-stationary time series (or unit root variables) fail to meet this assumption. Therefore, these time series need to be analysed with a different method called **cointegration**. More formally, the series *X_t* and *Y_t* are cointegrated if there exists a linear combination of them which is *stationary* i.e:   
 
 ![ff00.png](images/ff00.png) ,where *epsilon_t* is a *stationary* time series.
 
 ## Test for Cointegration
-Intuitively, some linear combination of the time series removes most of the auto-covarance and is mostly white noise, which is useful for pairs trading. Since the linear combination of prices of different assets is white noise, this relationship is expected to mean revert and trade can be executed accordingly.
+Intuitively, some linear combination of the time series removes most of the auto-covariance and is mostly white noise, which is useful for pairs trading. Since the linear combination of prices of different assets is white noise, this relationship is expected to mean revert and trade can be executed accordingly.
 
 In the case of pairs trading, the linear combination is expressed in terms of spread:
 
@@ -328,6 +328,7 @@ In the case of pairs trading, the linear combination is expressed in terms of sp
 ,where a minus sign is inserted to express that one asset is long and another is short, so that *h* defined is usually positive. If the spread is stationary, the currency pairs are cointegrated.
 
 **Engle-Granger two-step method** is used to check whether the spread is stationary. It involves the following: 
+
 1) Regressing one series on another to estimate the stationary long-term relationship  
 2) Applying an **Augmented Dickey-Fuller (ADF)** unit-root test to the regression residual. This test is implemented in `statsmodels.tsa.stattools.coint`.
 
@@ -336,17 +337,17 @@ Five coins are selected, which are Bitcoin(BTC/USDT), Ethereum(ETH/USDT), Cardan
 <p align="center"><img src='images/hm0.png' alt='hm0.png'></p>
 
 ## Trading Strategy with Spread
-In order to calculate the spread, a linear regression is implemented to get the beta coefficient. This coefficient can be interpreted as the hedge ratio to make the portfolio of the two coins stationary. In pair trading, one coin is long and simultaneously *hedge ratio* number of the other coin is short so that the linear combination of the two coins is stationary. As the cryptocurrency market is very volatile, it is more accurate to use rolling beta derived from Rolling Ordinary Least Square (RollingOLS) in order to estimate a hedge ratio that can vary with time.
+In order to calculate the spread, a linear regression is implemented to get the beta coefficient. This coefficient can be interpreted as the hedge ratio to make the portfolio of the two coins stationary. In pair trading, one coin is long and simultaneously *hedge ratio* number of the other coin is short so that the linear combination of the two coins is stationary. As the cryptocurrency market is very volatile, it is more accurate to use rolling beta derived from Rolling Ordinary Least Square (`RollingOLS`) in order to estimate a hedge ratio that can vary with time.
 
 In the stock market, the price ratio of the prices *S_1/S_2* is often used as a signal. The problem is that the ratio is not necessarily stationary or might not remain stationary throughout the period. And this is a problem encountered: as the price ratio instead of a dynamically changing hedge ratio is used, the two assets stopped being cointegrated after a while and observed some large losses in daily P&L calculation.
 
 The absolute spread is less helpful as the prices of coins can be very different in scale. Thus, the spread is normalized by transforming it to a z-score and use this z-score to derive our trading signal:
 
-1. enter a long (resp. short) position if the spread is below (resp. above) one, which means that the spread has moved one standard deviation below (resp. above) its moving average.
+1) enter a long (resp. short) position if the spread is below (resp. above) one, which means that the spread has moved one standard deviation below (resp. above) its moving average.
 
-2. exit trades when the spread changes sign which signals a mean reversion.
+2) exit trades when the spread changes sign which signals a mean reversion.
 
-Let's focus on the cointegrated pair (ETH/USDT, ADA/USDT) and visualize the price series, rolling beta, z-score, and the performance of the strategy against the benchmark (buy and hold). As explained above, statistics based on rolling windows is used to incorporate more recent data - a short window of one hour to smooth out the current spread information, a long window of 12 hours as a measure of the rolling mean as well as a 12 hours rolling standard deviation. The strategy outperforms buy and hold individual coins excluding costs.
+Let's focus on the cointegrated pair (ETH/USDT, ADA/USDT) and visualize the price series, rolling beta, z-score, and the performance of the strategy against the benchmark (buy and hold). As explained above, statistics based on rolling windows is used to incorporate more recent data - a short window of one hour to smooth out the current spread information, a long window of 12 hours as a measure of the rolling mean as well as a 12-hour rolling standard deviation. The strategy outperforms buy and hold individual coins excluding costs.
 
 <p align="center"><a href='images/p1.png' target='_blank'><img src='images/p1.png' alt='images/p1.png'></a></p>
 <p align="center"><a href='images/p2.png' target='_blank'><img src='images/p2.png' alt='images/p2.png'></a></p>
@@ -360,10 +361,10 @@ Statistical arbitrage models contain both *systemic* and *idiosyncratic* risks. 
 # Momentum Trading
 Momentum trading evaluates the strength of an asset's current trend to buy an asset while the price is rising and sell it at peak price before the asset's price starts to lose its momentum. This strategy perfectly reflects the common expression that "trend is your friend." By following the trend signals, volatile market like cryptocurrency can be profitable for short-term gains through a consistent buy and sell action.
 
-For example, when ETH/BTC increases in price, it attracts more attention from traders. This in turn pushes the price even higher. Sometimes, the sentiment called a fear of missing out (FOMO) would cause the price to increase for much longer than expected based on fundamental analysis until a large number of traders believe that the price is overbought and start to sell off. That is when the trend reversal happens.The new downtrend is also a momentum trading opportunity where traders enter the market by going short.
+For example, when ETH/BTC increases in price, it attracts more attention from traders. This in turn pushes the price even higher. Sometimes, the sentiment called a fear of missing out (FOMO) would cause the price to increase for much longer than expected based on fundamental analysis until a large number of traders believe that the price is overbought and start to sell off. That is when the trend reversal happens. The new downtrend is also a momentum trading opportunity where traders enter the market by going short.
 
 ## How to measure momentum
-The above mentioned indicators such as MA, ATR and RSI are considered as alpha factors resulting from transforming raw market data using arithmetic and are effective features for the momentun strategy. However, in this section lagged returns, momentum, volatility and distance are used as features for logistic regression.
+The above-mentioned indicators such as MA, ATR and RSI are considered as alpha factors resulting from transforming raw market data using arithmetic and are effective features for the momentum strategy. However, in this section lagged returns, momentum, volatility and distance are used as features for logistic regression.
 
 ## Features
 - **Lagged returns**: In addition to calculating most recent (*t* and *t-1*) return, more information about the strength of the cryptocurrency can be extracted from returns calculated using price data dated further back in time. For example, `lag = 3` creates three features with 1, 2, and 3 lookback period.  
@@ -380,10 +381,10 @@ Signals based on the most recent return are binarized outcomes: 1 if return is p
 <p align="center"><img src='images/m_equation.png' alt='m_equation.png'></p>
 
 ## Time series and cross-validation
-Cross-validation (CV) is a method for model selection. The main idea behind CV is to split the data several times so that each split is used once as a validation set and the remainder as a training set. A key assumption of CV is that the data is **independently and identically distributed (IID)**. However, financial returns often violates the IID assumptions. Therefore, it is important that splits respect temporal order to avoid **lookahead bias**. This can be achieved using sklearn's `TimeSeriesSplit` class which ensures that the test periods do not overlap and are located at the end of the period available in the data. After a test period is used, it becomes part of the training data that rolls forward and remains constant in size. Parameter tuning is done via `GridSearchCV` with performance metric `roc_auc` score.
+Cross-validation (CV) is a method for model selection. The main idea behind CV is to split the data several times so that each split is used once as a validation set and the remainder as a training set. A key assumption of CV is that the data is **independently and identically distributed (IID)**. However, financial returns often violates the IID assumptions. Therefore, it is important that splits respect temporal order to avoid **lookahead bias**. This can be achieved using scikit-learn's `TimeSeriesSplit` class which ensures that the test periods do not overlap and are located at the end of the period available in the data. After a test period is used, it becomes part of the training data that rolls forward and remains constant in size. Parameter tuning is done via `GridSearchCV` with performance metric `roc_auc` score.
 
 A typical train-test-split of 80/20 is done using `TimeSeriesSplit` on the data from 2017/07/14 to 2021/08/03. Logistic regression has only one hyperparameter, C which is set to [1.e-05, 1.e-04, 1.e-03, 1.e-02, 1.e-01, 1.e+00, 1.e+01, 1.e+02, 1.e+03, 1.e+04, 1.e+05]
-for gridsearch purpose. Hyperparameter tuning iterates under different lags of [1,3,5,7]. From below validation curves, it is evident that the AUC score is not sensitive to the change of hyperparameter C as both training and cross-validation curves are almost flat. All learning curve has a shaded confidence interval band around the cross-validaiton erro which indicates that the preidction errors are more driven by variance than by bias. The cross-validation performance continues to drop from a training size of 10,000 and eventually training and cross-validation scores tend to converge except for lag=1. It is unlikely that additional data will help improve performance. 
+for grid search purpose. Hyperparameter tuning iterates under different lags of [1,3,5,7]. From below validation curves, it is evident that the AUC score is not sensitive to the change of hyperparameter C as both training and cross-validation curves are almost flat. The learning curve has a shaded confidence interval band around the cross-validation error which indicates that the prediction errors are more driven by variance than by bias. The cross-validation performance continues to drop from a training size of 10,000 and eventually training and cross-validation scores tend to converge except for lag=1. It is unlikely that additional data will help improve performance. 
 
 
 <p align="center"><a href='images/p4.png' target='_blank'><img src='images/p4.png' alt='images/p4.png'></a></p>
@@ -405,7 +406,7 @@ The RDS database consists of 7 tables:
 | --- | --- |
 | pairs | Defines the currency pair information |
 | candlestick_15m | The raw 15m candlestick data |
-| features | Engineered features based candlestick data |
+| features | Engineered features-based candlestick data |
 | environment | Defines the simulation environment, such as starting funds, fee structures, and the currency pair |
 | strategy | Defines the trading strategy configurations and parameters |
 | simulation | Defines the simulation based on an environment and a strategy while keeping track of persistent variables. |
@@ -471,7 +472,7 @@ Amazon QuickSight is a business intelligence service.  It provides similar featu
 
 ## Amazon CloudWatch
 
-Amazon CloudWatch is AWS's monitoring service.  Logs from various services are sent to CloudWatch, where entires individually or visually as a group can be examined.  Dashboards can be created for a centralized view of all related services and alerts can be configured for when certain thresholds are exceeded.  A dashboard was created to monitoring RDS, SQS, and Lambda's metrics and performances.  Periodic spikes can be observed due to the regularity of incoming candlestick data and resulting simulation computations.
+Amazon CloudWatch is AWS's monitoring service.  Logs from various services are sent to CloudWatch, where entries individually or visually as a group can be examined.  Dashboards can be created for a centralized view of all related services and alerts can be configured for when certain thresholds are exceeded.  A dashboard was created to monitoring RDS, SQS, and Lambda's metrics and performances.  Periodic spikes can be observed due to the regularity of incoming candlestick data and resulting simulation computations.
 
 <p align="center"><a href='images/cloudwatch.png' target='_blank'><img src='images/cloudwatch.png' alt='Amazon Cloudwatch Screenshot'></a></p>
 <center><b>Figure X</b> - Amazon CloudWatch monitoring dashboard showing system under regular load and usage.</center>
@@ -483,11 +484,11 @@ Below table illustrates the evaluation metrics for visualizing the performance o
 |:-|:-|
 |Equity Curve|Total value of a portfolio over time|
 |Cumulative Returns|Accumulative percentage change of a portfolio value|
-|Drawdowns|A peak-to-trough decline during a specific period.It is an important measure of downside volatility|
+|Drawdowns|A peak-to-trough decline during a specific period. It is an important measure of downside volatility|
 |Rolling Volatility|Standard deviation of price from its mean, using a rolling winow|
-|Rolling Sharpe Ratio|Reward-to-risk ratio.The ratio of the expectation of the excess returns of the strategy to the standard deviation of excess returns using a rolling window.|
+|Rolling Sharpe Ratio|Reward-to-risk ratio. The ratio of the expectation of the excess returns of the strategy to the standard deviation of excess returns using a rolling window.|
 
-A function that accepts end of the day portfolio value (close price * quantity) and close price is written to automate portfolio evaluation process. It produces five graphs as per below. Generally speaking, equity curve and cumulative returns curve with positive slope is preferred as it suggests that a strategy is profitable. Observing the time and magnitude of drawdowns provides insights to volatile period of trading, which can be further analyzed for better risk management and alpha capture.
+A function that accepts end of the day portfolio value (close price * quantity) and close price is written to automate portfolio evaluation process. It produces five graphs as per below. Generally speaking, equity curve and cumulative returns curve with positive slope is preferred as it suggests that a strategy is profitable. Observing the time and magnitude of drawdowns provides insights to volatile period of trading, which can be further analysed for better risk management and alpha capture.
 
 <p align="center"><a href='images/perfeval.png' target='_blank'><img src='images/perfeval.png' alt='perfeval.png'></a></p>
 
