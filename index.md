@@ -488,7 +488,7 @@ Below table illustrates the evaluation metrics for visualizing the performance o
 |Rolling Volatility|Standard deviation of price from its mean, using a rolling winow|
 |Rolling Sharpe Ratio|Reward-to-risk ratio. The ratio of the expectation of the excess returns of the strategy to the standard deviation of excess returns using a rolling window.|
 
-A function that accepts end of the day portfolio value (close price * quantity) and close price is written to automate portfolio evaluation process. It produces five graphs as per below. Generally speaking, equity curve and cumulative returns curve with positive slope is preferred as it suggests that a strategy is profitable. Observing the time and magnitude of drawdowns provides insights to volatile period of trading, which can be further analysed for better risk management and alpha capture.
+The notebook [Performance_eval_no_benchmark.ipynb](https://github.com/mads-swaps/swap-for-profit/blob/main/zipline/Performance_eval_no_benchmark.ipynb) contains a function that accepts end of the day portfolio value (close price * quantity) and close price automates portfolio evaluation process. It produces five graphs as per below. Generally speaking, equity curve and cumulative returns curve with positive slope is preferred as it suggests that a strategy is profitable. Observing the time and magnitude of drawdowns provides insights to volatile period of trading, which can be further analysed for better risk management and alpha capture.
 
 <p align="center"><a href='images/perfeval.png' target='_blank'><img src='images/perfeval.png' alt='perfeval.png'></a></p>
 
