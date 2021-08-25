@@ -24,7 +24,7 @@ Forex is short for foreign currency exchange and is the trading of currencies wi
 A candlestick chart is the standard plot used in visualizing trading activity where a candle is represented by a box plot that visualizes 4 prices within a given period: the high, low, open, and close price.  The box, or body of the candle, is colored based on if the open price is greater than the close and differently if vice versa.  In the below chart, a white candlestick means the close price is higher than the open price meaning the price is going up.  The lines coming out of the candlestick body are called "shadows" or "wicks" and represent the price spread for the given period by extending out to the high and low prices.  An individual candlestick can represent a period as short as a second to days or weeks or more.  The chart below is a 15-minute candlestick chart so each candlestick represents a 15-minute period.
 
 <p align="center"><img src='images/15min_candle.png' alt='images/15min_candle.png'></p>
-<center><b>Figure X</b> - Here is an example 15-minute candlestick chart for the Ethereum/Bitcoin cryptocurrency exchange rate.<br>This visualization was rendered using the Python library <a href='https://github.com/matplotlib/mplfinance'><code>mplfinance</code></a>.</center>
+<center>Here is an example 15-minute candlestick chart for the Ethereum/Bitcoin cryptocurrency exchange rate.<br>This visualization was rendered using the Python library <a href='https://github.com/matplotlib/mplfinance'><code>mplfinance</code></a>.</center>
 
 # Data
 
@@ -134,7 +134,7 @@ In traditional forex trading, stop and limit orders are methods to protect an in
 In the example below, a buy opportunity is identified at the close of the 4:00am candlestick at a price of `0.060497` Bitcoin (`BTC`) per 1.0 Etherum (`ETH`).  Buying ETH at this price, a target and stop-loss is calculated with a `1.0% : 0.5%` ratio, thus `0.061102` for a target and `0.060195` for a stop-loss.  The price reaches the target price eight candlesticks later or 2 hours later at 6:00 am, thus securing `1.0%` profit (assuming no fees).
 
 <p align="center"><img src='images/target_profits.png' alt='images/target_profits.png'></p>
-<center><b>Figure X</b> - Example <code>ETH</code> buy opportunity.</center>
+<center>Example <code>ETH</code> buy opportunity.</center>
 
 ### Identifying Buying Opportunities
 
@@ -151,7 +151,7 @@ In the example above, a `1.0% : 0.5%` ratio is used but is this a good ratio to 
 Models generally perform better on balanced data so getting half of the labels to be `1` is ideal.  But achieving this with a ratio that is consistent and profitable may not be practical.  To find a good ratio, different multiples are generated and the percent of `1`'s is plotted.  On the below ATR ratio figure, the multiple of `2x` means the numerator is `2` times the denominator, where the denominator is the `x-axis` value.  Therefore, when `x-axis = 3` the ratio is `6:3`.  When the multiple is `4x` and `x-axis = 2`, the ratio is `8:2`, etc.  For the percentage ratio, the `x-axis` represents the numerator, and the denominator is then the numerator divided by the legend's label.  For example, when `x-axis = 0.01` for the `/2` line, the ratio is `1.0% : 0.5%`.
 
 <p align="center"><img src='images/find_ratio.png' alt='images/find_ratio.png'></p>
-<center><b>Figure X</b> - Finding the best ratios to maximize label data using a window of <code>30</code> on ETHBTC 15-minute candles.</center>
+<center>Finding the best ratios to maximize label data using a window of <code>30</code> on ETHBTC 15-minute candles.</center>
 
 Unsurprisingly, as the ratio grows or ratio multiple grows, fewer buy opportunities can be found in the data because there are fewer windows where high profits can be achieved and fewer windows where smaller stop-losses don't get wicked out by the volatility of the market.  None of the plots reaches the goal of `50%` but the results provide plenty of options to avoid sparsely labelled data.  From this analysis, the ATR Ratio is maximized at `2:1` with approximately `40%` of the labels being `1`.  The percentage ratio is maximized at `1.0% : 0.5%` with approximately `27%` of the labels being `1`.
 
@@ -261,7 +261,7 @@ Where *r_j* is the prediction result for the *j*th record, *p_m[i]* is the predi
 Finding a good value for *t* can be achieved by trying out by measuring the precision, recall, and simulated profit.  Another issue that needs to be considered is that the datasets use different ratios so which ratio should be used on the ensemble?  It stands to reason that the model/dataset with the highest precision should be used since that carries the most weight.  However, simulations show this is not always the case as will be shown later with the scaled version shown later.  For the logistic regression, it so happens that these are aligned.  In the below figure, profit is maximized at a threshold of `0.12` with a value of `1.86` which surpasses any individual model simulation performance.
 
 <p align="center"><img src='images/ensemble_find_t.png' alt='images/ensemble_find_t.png'></p>
-<center><b>Figure X</b> - Simulated precision, recall, and profit for varying thresholds on a Logistic Regression ensemble.</center>
+<center>Simulated precision, recall, and profit for varying thresholds on a Logistic Regression ensemble.</center>
 
 ### Scaling Data in Isolation
 
@@ -276,7 +276,7 @@ Using this scaling algorithm, each record is individually scaled independently o
 Using the scaler discussed previously, a new ensemble of logistic regression models can be produced with the goal of having a model that be able to perform on both `ETHBTC` and `BTCETH` trading.  Again, a threshold and ratio are brute-forced.  In the below figure, profit is maximized at a threshold of `0.10` with a value of `1.35` again surpassing any individual model simulation performance.  This time, the profit is maximized with a ratio of `4:2` in contrast with the highest precision dataset being `2:1`.
 
 <p align="center"><img src='images/scaled_ensemble_find_t.png' alt='images/scaled_ensemble_find_t.png'></p>
-<center><b>Figure X</b> - Simulated precision, recall, and profit for varying thresholds on a scaled Logistic Regression ensemble.</center>
+<center>Simulated precision, recall, and profit for varying thresholds on a scaled Logistic Regression ensemble.</center>
 
 ### Deep Neural Network
 
@@ -294,7 +294,7 @@ To see how a deep neural network can perform on the same datasets used to train 
 Below is a figure of the training and validations results of this subset of models.  While 20 epochs are still quite young for a comprehensive analysis, some trends do start to appear which only become more pronounced with further epochs and as many as 100 when the training set begins to converge.
 
 <p align="center"><a href='images/resnet28_res.png' target='_blank'><img src='images/resnet28_res.png' alt='images/resnet28_res.png'></a></p>
-<center><b>Figure X</b> - Simulated precision, recall, and profit for varying thresholds on a scaled Logistic Regression ensemble.</center>
+<center>Simulated precision, recall, and profit for varying thresholds on a scaled Logistic Regression ensemble.</center>
 
 The general trend that is consistent across all models is that the training loss drops predictably and consistently but the validation loss steeply rises after just a few epochs.  The recall on the validation set generally does slowly improve which also improves the F1-score but the precision remains erratic, averaging around `0.5`.  This unexpected behavior is likely due to a shift in how the `ETHBTC` market behaves over time, so the model is learning a strategy that is no longer profitable in 2021.  To validate this, each model was simulated with the results in the below table.
 
@@ -394,7 +394,7 @@ for grid search purpose. Hyperparameter tuning iterates under different lags of 
 An AWS credit of 600 USD was used to build a scalable production environment where it is easy to deploy changes without having to worry too much about provisioning and managing hardware.
 
 <p align="center"><img src='images/simple_diagram.png' alt='Simplified diagram of AWS services used for data acquisition and simulation'></p>
-<center><b>Figure X</b> - Simplified diagram of AWS services used for data acquisition and simulation.</center>
+<center>Simplified diagram of AWS services used for data acquisition and simulation.</center>
 
 ## Amazon Relational Database Service
 
@@ -413,7 +413,7 @@ The RDS database consists of 7 tables:
 | simulation_records | Historical records of all periods for each simulation. |
 
 <p align="center"><a href='images/rds.png' target='_blank'><img src='images/rds.png' alt='ER Diagram of the Database'></a></p>
-<center><b>Figure X</b> - ER Diagram of the Database.</center>
+<center>ER Diagram of the Database.</center>
 
 The SQL files to recreate the database are available [here](https://github.com/mads-swaps/swap-for-profit/tree/main/aws/rds).
 
@@ -451,7 +451,7 @@ When the `BinanceCrawlerFunction` Lambda processes a complete candlestick for a 
 The completed flow of the AWS architecture can be seen below:
 
 <p align="center"><a href='images/detail_diagram.png' target='_blank'><img src='images/detail_diagram.png' alt='Detailed diagram of AWS services used for data acquisition and simulation'></a></p>
-<center><b>Figure X</b> - Detailed diagram of AWS services used for data acquisition and simulation.</center>
+<center>Detailed diagram of AWS services used for data acquisition and simulation.</center>
 
 The main flows are:
 
@@ -468,14 +468,14 @@ The main flows are:
 Amazon QuickSight is a business intelligence service.  It provides similar features to that of Power BI and Tableau, but have tighter integrations with the AWS ecosystem, such as directly accessing data from the RDS.  For this project, QuickSight was used to visualize ongoing cumulative returns for each simulation, with additional interactive features such as filtering and grouping for further comparisons.
 
 <p align="center"><a href='images/quicksight.png' target='_blank'><img src='images/quicksight.png' alt='Amazon QuickSight Screenshot'></a></p>
-<center><b>Figure X</b> - Amazon QuickSight visualization.</center>
+<center>Amazon QuickSight visualization.</center>
 
 ## Amazon CloudWatch
 
 Amazon CloudWatch is AWS's monitoring service.  Logs from various services are sent to CloudWatch, where entries individually or visually as a group can be examined.  Dashboards can be created for a centralized view of all related services and alerts can be configured for when certain thresholds are exceeded.  A dashboard was created to monitoring RDS, SQS, and Lambda's metrics and performances.  Periodic spikes can be observed due to the regularity of incoming candlestick data and resulting simulation computations.
 
 <p align="center"><a href='images/cloudwatch.png' target='_blank'><img src='images/cloudwatch.png' alt='Amazon Cloudwatch Screenshot'></a></p>
-<center><b>Figure X</b> - Amazon CloudWatch monitoring dashboard showing system under regular load and usage.</center>
+<center>Amazon CloudWatch monitoring dashboard showing system under regular load and usage.</center>
 
 # Evaluation
 Below table illustrates the evaluation metrics for visualizing the performance of a strategy.
